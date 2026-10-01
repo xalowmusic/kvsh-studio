@@ -4,121 +4,137 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>KVSH Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Gochi+Hand&display=swap">
 <style>
-/* Layout: one light screen, no scroll. An old desktop: menu bar on top, a pile of polaroids (real Reels/TikTok players), stickers and old windows you drag around. Single light look on purpose. */
+/* Layout: a paper desk in the Lemon Drops doodle style. Menu on top, a pile of taped polaroids (real Reels/TikTok players), crayon notes, stickers and hand-drawn windows you drag around. Light only, on purpose. */
+@font-face{font-family:"KidType Crayon";src:local("KidType Crayon"),local("KidTypeCrayon"),url("fonts/KidTypeCrayon.woff2") format("woff2"),url("fonts/KidTypeCrayon.ttf") format("truetype");font-display:swap}
 :root{
-  --desk:#f3f2ee; --dot:rgba(40,40,30,.09);
-  --card:#ffffff; --fill:#f2f2f5; --fill-hover:#e9e9ee;
-  --text:#1d1d1f; --text-2:#6e6e73; --sep:rgba(0,0,0,.08);
-  --lemon:#e6f53f; --on-lemon:#1d1d1f; --ink:#4f5e00; --ring:rgba(120,140,0,.35);
-  --pink:#ff8fc7; --sky:#8fd3ff; --orange:#ff9f43; --hot:#e0002a; --ok:#248a3d;
-  --win-line:#1d1d1f; --stripe:rgba(0,0,0,.5);
-  --shadow:0 1px 2px rgba(0,0,0,.08),0 6px 16px rgba(0,0,0,.08);
-  --shadow-lift:0 4px 10px rgba(0,0,0,.1),0 22px 44px rgba(0,0,0,.18);
-  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Segoe UI",Roboto,sans-serif;
-  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --paper:#faf7f0; --ink:#1c1c1c; --grey:#8a8578; --white:#fffdf8;
+  --green:#3f7a3d; --green-fill:#c8e6c0; --yellow:#e0b23e; --lilac:#9c8fc9; --coral:#e07a5f; --blue:#3f6fa3;
+  --line:rgba(28,28,28,.14);
+  --crayon:"KidType Crayon","Gochi Hand","Comic Sans MS",cursive;
+  --body:"Space Grotesk","Segoe UI",system-ui,sans-serif;
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+  --r:10px;
+  --doodle:255px 15px 225px 15px/15px 225px 15px 255px;
+  --shadow:2px 3px 0 rgba(28,28,28,.12);
+  --shadow-lift:4px 8px 0 rgba(28,28,28,.12),0 18px 36px rgba(28,28,28,.16);
   color-scheme:light;
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{background:var(--desk);color:var(--text);font:15px/1.4 var(--font);-webkit-font-smoothing:antialiased;overflow:hidden;display:flex;flex-direction:column}
+body{background:var(--paper);color:var(--ink);font:15px/1.45 var(--body);-webkit-font-smoothing:antialiased;overflow:hidden;display:flex;flex-direction:column}
 button,input,select{font:inherit;color:inherit}
-a{color:var(--ink)}
+a{color:var(--blue)}
 [hidden]{display:none!important}
 
-.bar{flex:none;display:flex;align-items:center;gap:2px;padding:6px 16px;padding-top:calc(6px + env(safe-area-inset-top,0px));background:rgba(255,255,255,.8);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);box-shadow:0 1px 0 var(--sep);z-index:99999;overflow-x:auto;white-space:nowrap;font-size:14px}
-.brand{display:flex;align-items:center;gap:8px;font-weight:700;margin-right:10px;letter-spacing:-.01em}
-.brand::before{content:"";width:16px;height:16px;border-radius:50% 50% 50% 8%;background:var(--lemon);transform:rotate(-45deg);box-shadow:inset -3px -3px 0 rgba(0,0,0,.08)}
-.mi{border:0;background:none;padding:4px 10px;border-radius:6px;cursor:pointer}
-.mi:hover,.mi:focus-visible{background:var(--text);color:#fff;outline:none}
-.bar .right{margin-left:auto;display:flex;gap:12px;align-items:center;color:var(--text-2);font-variant-numeric:tabular-nums;padding-left:12px}
+/* top bar */
+.bar{flex:none;display:flex;align-items:center;gap:4px;padding:8px 16px;padding-top:calc(8px + env(safe-area-inset-top,0px));background:var(--paper);border-bottom:2px solid var(--ink);z-index:99999;overflow-x:auto;white-space:nowrap}
+.brand{font-family:var(--crayon);font-size:26px;line-height:1;margin-right:12px;display:flex;align-items:center;gap:8px}
+.brand svg{flex:none}
+.mi{border:0;background:none;padding:5px 10px;border-radius:var(--doodle);cursor:pointer;font-weight:500;transition:transform 160ms var(--ease-out),background-color 150ms ease}
+.mi:active{transform:scale(.97)}
+@media (hover:hover) and (pointer:fine){.mi:hover{background:var(--green-fill)}}
+.mi:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.bar .right{margin-left:auto;display:flex;gap:12px;align-items:center;color:var(--grey);font-size:13px;font-variant-numeric:tabular-nums;padding-left:12px}
 
-.desk{position:relative;flex:1;min-height:0;overflow:hidden;background-image:radial-gradient(var(--dot) 1px,transparent 1px);background-size:7px 7px;touch-action:none}
-.item{position:absolute;left:0;top:0;will-change:transform;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none;transition:box-shadow 180ms ease}
-.item.lifted{cursor:grabbing;box-shadow:var(--shadow-lift)!important}
-.item:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
-/* while anything is being dragged, players stop eating the pointer */
+.desk{position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none}
+.item{position:absolute;left:0;top:0;will-change:transform;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none}
+.item.lifted{cursor:grabbing}
+.item:focus-visible{outline:2px dashed var(--ink);outline-offset:4px}
 body.dragging iframe{pointer-events:none}
 
-/* polaroid with a real player inside */
-.pola{width:calc(var(--pw) + 20px);background:var(--card);padding:10px 10px 0;box-shadow:var(--shadow);border-radius:2px}
-.screen{position:relative;width:var(--pw);height:calc(var(--pw) * var(--ar));overflow:hidden;background:#111}
-.screen iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;background:#111}
-.screen canvas{display:block;width:100%;height:100%}
-.screen .play{position:absolute;left:50%;top:50%;translate:-50% -50%;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.88);display:grid;place-items:center}
-.screen .play::after{content:"";border-left:11px solid #111;border-block:7px solid transparent;margin-left:3px}
+/* polaroid */
+.pola{width:calc(var(--pw) + 20px);background:var(--white);padding:10px 10px 0;border:1.5px solid var(--ink);border-radius:3px;box-shadow:var(--shadow);transition:box-shadow 180ms var(--ease-out)}
+.pola.lifted{box-shadow:var(--shadow-lift)}
+.screen{position:relative;width:var(--pw);height:calc(var(--pw) * var(--ar));overflow:hidden;background:#ece7db;border:1.5px solid var(--ink);border-radius:2px}
+.screen iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;background:#ece7db}
+.ph{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:8px;text-align:center;padding:12px;color:var(--ink)}
+.ph .net{font-family:var(--crayon);font-size:22px;line-height:1}
+.ph small{font-size:11px;color:var(--grey);line-height:1.3}
 .cap{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 2px 10px}
-.who{min-width:0;font-size:13px;line-height:1.25;cursor:pointer}
-.who b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
-.who span{color:var(--text-2);font-size:12px}
-.vote{flex:none;border:0;background:var(--fill);border-radius:99px;padding:4px 9px;font-size:12px;font-weight:600;cursor:pointer;font-variant-numeric:tabular-nums;transition:transform 120ms ease-out,background-color 150ms}
-.vote:hover{background:var(--fill-hover)}
-.vote:active{transform:scale(.92)}
-.vote[aria-pressed="true"]{background:var(--lemon);color:var(--on-lemon)}
-.tape{position:absolute;top:-10px;left:50%;width:58px;height:20px;translate:-50% 0;rotate:-4deg;background:rgba(230,245,63,.7);z-index:2}
-.tape.pink{background:rgba(255,143,199,.65);rotate:5deg;left:30%}
+.who{min-width:0;line-height:1.2}
+.who b{display:block;font-family:var(--crayon);font-weight:400;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who span{color:var(--grey);font-size:12px}
+.vote{flex:none;border:1.5px solid var(--ink);background:var(--white);border-radius:var(--doodle);padding:3px 10px;font-size:13px;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums;transition:transform 160ms var(--ease-out),background-color 150ms ease}
+.vote:active{transform:scale(.97)}
+.vote[aria-pressed="true"]{background:var(--green-fill)}
+.vote:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.tape{position:absolute;top:-11px;left:50%;width:62px;height:22px;translate:-50% 0;rotate:-4deg;background:rgba(224,178,62,.55);z-index:2;clip-path:polygon(3% 0,97% 4%,100% 50%,96% 100%,2% 96%,0 45%)}
+.tape.lilac{background:rgba(156,143,201,.55);rotate:6deg;left:28%}
 
-/* stickers: on posts and loose on the desk */
-.stk{position:absolute;z-index:3;display:grid;place-items:center;text-align:center;font-weight:800;line-height:1;letter-spacing:-.02em;pointer-events:none;filter:drop-shadow(0 1px 1px rgba(0,0,0,.18))}
-.stk.round{width:58px;height:58px;border-radius:50%;border:3px solid #fff;font-size:12px}
-.stk.star{width:70px;height:70px;font-size:12px;clip-path:polygon(50% 0,61% 14%,79% 7%,80% 26%,98% 30%,88% 47%,100% 62%,82% 69%,82% 89%,63% 85%,50% 100%,37% 85%,18% 89%,18% 69%,0 62%,12% 47%,2% 30%,20% 26%,21% 7%,39% 14%)}
-.stk.pill{padding:6px 10px;border-radius:99px;border:2px solid #fff;font-size:12px}
+/* stickers (die-cut look: white rim + soft drop) */
+.stk{position:absolute;z-index:3;display:grid;place-items:center;text-align:center;font-family:var(--crayon);line-height:.95;pointer-events:none;color:var(--ink);border:3px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.stk.round{width:62px;height:62px;border-radius:50%;font-size:17px}
+.stk.pill{padding:5px 12px 6px;border-radius:99px;font-size:18px;white-space:nowrap}
+.stk.drop{width:58px;height:58px;border-radius:50% 50% 50% 8%;rotate:-45deg}
+.stk.drop span{rotate:45deg;font-size:16px}
 .loose{position:absolute}
 .loose .stk{position:static;pointer-events:auto}
-.loose.item{box-shadow:none}
-.loose.lifted{box-shadow:none!important}
-.loose.lifted .stk{filter:drop-shadow(0 10px 12px rgba(0,0,0,.25))}
+.loose.lifted .stk{box-shadow:0 10px 18px rgba(0,0,0,.22)}
 
-.note{width:170px;padding:14px 14px 18px;background:var(--lemon);color:var(--on-lemon);box-shadow:var(--shadow);font-weight:700;font-size:20px;line-height:1.05;letter-spacing:-.02em}
-.note.paper{font-size:13px;font-weight:500;line-height:1.35;letter-spacing:0;width:200px;background:#fff;color:var(--text)}
-.note.paper b{font-weight:700}
+/* crayon notes and doodles */
+.note{width:180px;padding:14px 16px 18px;background:var(--yellow);font-family:var(--crayon);font-size:26px;line-height:1;box-shadow:var(--shadow);border-radius:2px}
+.note.paper{background:var(--white);border:1.5px solid var(--ink);font-family:var(--body);font-size:13px;line-height:1.4;width:210px}
+.note.paper b{font-family:var(--crayon);font-weight:400;font-size:20px;display:block;line-height:1;margin-bottom:4px}
+.doodle{pointer-events:none}
+.doodle svg{display:block;overflow:visible}
+.doodle path{fill:none;stroke:var(--ink);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 
-.win{width:var(--ww,300px);background:var(--card);border:1.5px solid var(--win-line);box-shadow:3px 3px 0 var(--win-line)}
-.win.lifted{box-shadow:3px 3px 0 var(--win-line),var(--shadow-lift)!important}
-.tb{display:flex;align-items:center;gap:8px;height:24px;padding:5px 6px;border-bottom:1.5px solid var(--win-line);background:repeating-linear-gradient(to bottom,var(--stripe) 0 1px,transparent 1px 3px);background-clip:content-box}
-.tb .x{flex:none;width:13px;height:13px;border:1.5px solid var(--win-line);background:var(--card);padding:0;cursor:pointer}
-.tb .x:hover{background:var(--text)}
-.tb .t{margin:0 auto;padding:0 8px;background:var(--card);font-size:12px;font-weight:700;line-height:14px;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tb .sp{width:13px;flex:none}
+/* hand-drawn windows */
+.win{width:var(--ww,300px);background:var(--white);border:2px solid var(--ink);border-radius:var(--r);box-shadow:var(--shadow);transition:box-shadow 180ms var(--ease-out)}
+.win.lifted{box-shadow:var(--shadow-lift)}
+.tb{display:flex;align-items:center;gap:8px;padding:8px 12px 6px;border-bottom:2px solid var(--ink)}
+.tb .x{flex:none;width:22px;height:22px;border:0;background:none;padding:0;cursor:pointer;display:grid;place-items:center;border-radius:50%;transition:transform 160ms var(--ease-out),background-color 150ms}
+.tb .x:active{transform:scale(.92)}
+@media (hover:hover) and (pointer:fine){.tb .x:hover{background:var(--green-fill)}}
+.tb .x svg path{stroke:var(--ink);stroke-width:2.2;stroke-linecap:round;fill:none}
+.tb .x:focus-visible{outline:2px solid var(--ink)}
+.tb .t{font-family:var(--crayon);font-size:22px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wb{padding:14px;display:grid;gap:10px;font-size:14px}
-.wb h2{margin:0;font-size:26px;line-height:1.05;letter-spacing:-.025em;font-weight:700}
-.muted{color:var(--text-2)}
-.specs{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--text-2);font-variant-numeric:tabular-nums}
-.specs b{color:var(--text)}
-.clock{font-size:12px;background:var(--fill);border-radius:8px;padding:6px 8px;font-variant-numeric:tabular-nums}
-.rk{display:grid;gap:2px;margin:0;padding:0;list-style:none}
-.rk li{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--sep)}
-.rk .n{font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
-.rk li:first-child .n{color:var(--hot)}
+.wb h2{margin:0;font-family:var(--crayon);font-weight:400;font-size:38px;line-height:.9}
+.muted{color:var(--grey)}
+.specs{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;font-variant-numeric:tabular-nums}
+.specs span{border:1.5px solid var(--ink);border-radius:var(--doodle);padding:2px 9px}
+.specs span:nth-child(1){background:var(--green-fill)}
+.clock{font-size:12px;color:var(--grey);font-variant-numeric:tabular-nums}
+.rk{display:grid;margin:0;padding:0;list-style:none}
+.rk li{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:8px;align-items:center;padding:7px 0;border-top:1.5px dashed var(--line)}
+.rk .n{font-family:var(--crayon);font-size:24px;line-height:1;text-align:center}
+.rk li:first-child .n{color:var(--coral)}
 .rk .w{min-width:0}
-.rk .w b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rk .w span{font-size:12px;color:var(--text-2)}
-.btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:99px;padding:9px 16px;font-weight:600;font-size:14px;cursor:pointer;background:var(--fill);text-decoration:none;color:var(--text);transition:transform 120ms ease-out}
-.btn:active{transform:scale(.96)}
-.btn.primary{background:var(--text);color:#fff}
-.btn.lemon{background:var(--lemon);color:var(--on-lemon)}
-.btn:focus-visible,.vote:focus-visible,.mi:focus-visible,.tb .x:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.big{position:relative;width:100%;overflow:hidden;background:#111;border-radius:2px}
-.big iframe{display:block;width:100%;border:0}
-.big canvas{display:block;width:100%;aspect-ratio:9/12;max-height:30vh;object-fit:cover}
+.rk .w b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk .w span{font-size:12px;color:var(--grey)}
+.btn{display:inline-flex;align-items:center;justify-content:center;border:2px solid var(--ink);border-radius:var(--doodle);padding:8px 16px;font-weight:700;font-size:14px;cursor:pointer;background:var(--white);color:var(--ink);text-decoration:none;transition:transform 160ms var(--ease-out),background-color 150ms ease}
+.btn:active{transform:scale(.97)}
+.btn.go{background:var(--green-fill)}
+@media (hover:hover) and (pointer:fine){.btn:hover{background:var(--green-fill)}.btn.go:hover{background:#b6dcac}}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.big{position:relative;width:100%;overflow:hidden;background:#ece7db;border:1.5px solid var(--ink);border-radius:2px}
+.big iframe{display:block;border:0}
+.big .ph{position:relative;min-height:220px}
 
-.wb label{display:grid;gap:4px;font-size:13px;font-weight:600}
-.wb input[type=text],.wb input[type=url],.wb select{width:100%;background:var(--fill);border:1px solid transparent;border-radius:10px;padding:9px 11px;font-size:15px;appearance:none}
-.wb input:focus,.wb select:focus{outline:none;background:var(--card);border-color:var(--ink);box-shadow:0 0 0 4px var(--ring)}
+.wb label{display:grid;gap:4px;font-size:13px;font-weight:500}
+.wb input[type=text],.wb input[type=url],.wb select{width:100%;background:var(--paper);border:1.5px solid var(--ink);border-radius:var(--r);padding:9px 11px;font-size:15px;appearance:none}
+.wb input:focus,.wb select:focus{outline:none;box-shadow:0 0 0 3px var(--green-fill)}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.det{font-size:12px;min-height:16px;color:var(--text-2)}
-.det.ok{color:var(--ok)}.det.err{color:var(--hot)}
-.chk{display:flex!important;align-items:center;gap:8px;font-weight:500!important;cursor:pointer}
-.chk input{accent-color:var(--ink);width:16px;height:16px}
+.det{font-size:12px;min-height:16px;color:var(--grey)}
+.det.ok{color:var(--green)}.det.err{color:var(--coral)}
+.chk{display:flex!important;align-items:center;gap:8px;cursor:pointer}
+.chk input{accent-color:var(--green);width:16px;height:16px}
 .row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
-pre{margin:0;background:var(--fill);border-radius:8px;padding:8px;font:11px/1.45 var(--mono);overflow-x:auto;white-space:pre;user-select:text}
-.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));translate:-50% 0;background:var(--text);color:#fff;padding:9px 16px;border-radius:99px;font-size:14px;font-weight:600;z-index:100000}
-@media (max-width:560px){.bar{padding-inline:12px;font-size:13px}.mi{padding:4px 7px}.note{width:140px;font-size:17px}}
+pre{margin:0;background:var(--paper);border:1.5px dashed var(--line);border-radius:var(--r);padding:8px;font:11px/1.45 ui-monospace,Menlo,Consolas,monospace;overflow-x:auto;white-space:pre;user-select:text}
+details summary{font-size:12px;color:var(--grey);cursor:pointer}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));translate:-50% 0;background:var(--ink);color:var(--paper);padding:8px 16px 9px;border-radius:var(--doodle);font-family:var(--crayon);font-size:20px;z-index:100000;transition:opacity 200ms var(--ease-out),transform 200ms var(--ease-out)}
+.toast[hidden]{display:block!important;opacity:0;transform:translateY(8px);pointer-events:none}
+@media (max-width:560px){.bar{padding-inline:12px}.brand{font-size:22px}.mi{padding:5px 7px;font-size:14px}.note{width:150px;font-size:22px}}
+@media (prefers-reduced-motion:reduce){.toast{transition:opacity 200ms ease}.toast[hidden]{transform:none}}
 </style>
 </head>
 <body>
 <div class="bar" role="menubar" aria-label="Menu">
-  <span class="brand">kvsh studio</span>
+  <span class="brand"><svg width="18" height="22" viewBox="0 0 18 22" aria-hidden="true"><path d="M9 1.5C6 6 2.2 9.6 2.2 14a6.8 6.8 0 0 0 13.6 0C15.8 9.6 12 6 9 1.5Z" fill="#c8e6c0" stroke="#1c1c1c" stroke-width="1.8" stroke-linejoin="round"/></svg>kvsh studio</span>
   <button class="mi" role="menuitem" id="m-post">postar</button>
   <button class="mi" role="menuitem" id="m-cover">cover da semana</button>
   <button class="mi" role="menuitem" id="m-tidy">arrumar</button>
@@ -191,10 +207,10 @@ const SEED = [
   { id:"r8", net:"instagram", vid:"DOJukicCQ2_", url:"https://www.instagram.com/reel/DOJukicCQ2_/", h:"@karanaujla", city:"—", inst:"vocal", cover:false, votes:152 },
 ];
 const STICKERS = {
-  lemon: `<span class="stk round" style="background:var(--lemon);color:var(--on-lemon);right:-14px;top:-14px;rotate:12deg">lemon<br>drops</span>`,
-  top: `<span class="stk star" style="background:var(--orange);color:#fff;left:-18px;top:30%;rotate:-14deg">top<br>1</span>`,
-  fogo: `<span class="stk pill" style="background:var(--pink);color:#1d1d1f;right:-10px;bottom:56px;rotate:-8deg">tá pegando fogo</span>`,
-  novo: `<span class="stk round" style="background:var(--sky);color:#1d1d1f;left:-12px;bottom:60px;rotate:-10deg">novo</span>`,
+  lemon: `<span class="stk drop" style="background:var(--green-fill);right:-14px;top:-12px"><span>lemon</span></span>`,
+  top: `<span class="stk round" style="background:var(--yellow);left:-16px;top:32%;rotate:-12deg">top 1</span>`,
+  fogo: `<span class="stk pill" style="background:var(--coral);right:-12px;bottom:58px;rotate:-7deg">tá pegando fogo</span>`,
+  novo: `<span class="stk round" style="background:var(--lilac);left:-12px;bottom:62px;rotate:-10deg">novo</span>`,
 };
 
 const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
@@ -240,24 +256,9 @@ function scatterPos(el) {
   return { x: rand(0, Math.max(0, b.W - b.w)), y: rand(0, Math.max(0, b.H - b.h * .75)) };
 }
 
-function paint(cv, seedStr, w = 220, h = 390) {
-  cv.width = w; cv.height = h;
-  const c = cv.getContext("2d");
-  let s = [...seedStr].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 9);
-  const rnd = () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296;
-  c.fillStyle = `hsl(${rnd()*360} 25% 10%)`; c.fillRect(0, 0, w, h);
-  c.globalCompositeOperation = "lighter";
-  for (let i = 0; i < 3; i++) {
-    const x = rnd() * w, y = rnd() * h * .7, rad = w * (.3 + rnd() * .5), hue = rnd() * 360;
-    const g = c.createRadialGradient(x, y, 0, x, y, rad);
-    g.addColorStop(0, `hsla(${hue} 80% 55% / .55)`); g.addColorStop(1, "transparent");
-    c.fillStyle = g; c.fillRect(0, 0, w, h);
-  }
-  c.globalCompositeOperation = "source-over";
-  c.fillStyle = "rgba(0,0,0,.7)";
-  const cx = w * (.35 + rnd() * .3);
-  c.beginPath(); c.arc(cx, h * .55, w * .12, 0, Math.PI * 2); c.fill();
-  c.beginPath(); c.ellipse(cx, h * 1.02, w * .32, h * .36, 0, 0, Math.PI * 2); c.fill();
+// Inside the Claude preview the players are blocked, so the photo shows where the video comes from.
+function placeholder(p) {
+  return `<div class="ph"><span class="net">${p.net === "instagram" ? "reels" : "tiktok"}</span><small>${esc(p.h)}<br>toca no site publicado</small></div>`;
 }
 
 // Fits a native-size player into a box by scaling it, so the real controls still work.
@@ -265,8 +266,7 @@ function playerInto(box, p, width) {
   const P = PLAYER[p.net], k = width / P.w;
   box.style.setProperty("--ar", P.h / P.w);
   if (SANDBOX) {
-    const cv = document.createElement("canvas"); box.appendChild(cv); paint(cv, p.id + p.h);
-    box.insertAdjacentHTML("beforeend", `<span class="play"></span>`);
+    box.innerHTML = placeholder(p);
     return;
   }
   const f = document.createElement("iframe");
@@ -281,7 +281,7 @@ function polaroid(p) {
   const el = document.createElement("div");
   el.className = "item pola"; el.dataset.post = p.id;
   el.setAttribute("aria-label", `${p.h}, ${p.inst}. Enter abre, setas movem`);
-  const tape = Math.random() < .5 ? `<span class="tape${Math.random() < .4 ? " pink" : ""}"></span>` : "";
+  const tape = Math.random() < .5 ? `<span class="tape${Math.random() < .4 ? " lilac" : ""}"></span>` : "";
   el.innerHTML = `${tape}<div class="screen"></div>
     <div class="cap"><div class="who" data-open-post="${p.id}"><b>${esc(p.h)}</b><span>${esc(p.inst)} · ${netName(p)}</span></div>
     <button class="vote" data-vote="${p.id}" aria-pressed="${voted.has(p.id)}">▲ ${votesOf(p)}</button></div>
@@ -297,7 +297,7 @@ function win(id, title, body, width) {
   if (el) { el.querySelector(".tb .t").textContent = title; el.querySelector(".wb").innerHTML = body; front(el); return { el, fresh: false }; }
   el = document.createElement("div");
   el.className = "item win"; el.id = id; el.style.setProperty("--ww", width + "px");
-  el.innerHTML = `<div class="tb"><button class="x" aria-label="Fechar"></button><span class="t">${esc(title)}</span><span class="sp"></span></div><div class="wb">${body}</div>`;
+  el.innerHTML = `<div class="tb"><button class="x" aria-label="Fechar"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M1.5 1.8 10.4 10.2M10.2 1.4 1.7 10.6"/></svg></button><span class="t">${esc(title)}</span></div><div class="wb">${body}</div>`;
   return { el, fresh: true };
 }
 function front(el) { el.style.zIndex = ++z; }
@@ -310,10 +310,10 @@ function closeItem(el) {
 function coverBody() {
   const list = posts().filter(p => p.cover).sort((a, b) => votesOf(b) - votesOf(a)).slice(0, 5);
   return `<div class="muted">semana ${COVER.week}</div><h2>${COVER.song}</h2><div class="muted">${COVER.by}</div>
-    <div class="specs"><span>bpm <b>${COVER.bpm}</b></span><span>tom <b>${COVER.key}</b></span><span>vídeo <b>9:16, até 90s</b></span></div>
+    <div class="specs"><span>${COVER.bpm} bpm</span><span>${COVER.key}</span><span>9:16, até 90s</span></div>
     <div class="clock" data-clock></div>
     <ol class="rk">${list.map((p, i) => `<li><span class="n">${i + 1}</span><span class="w"><b>${esc(p.h)}</b><span>${esc(p.inst)} · ${netName(p)}</span></span><button class="vote" data-vote="${p.id}" aria-pressed="${voted.has(p.id)}">▲ ${votesOf(p)}</button></li>`).join("")}</ol>
-    <button class="btn lemon" data-open="post-cover">mandar meu cover</button>`;
+    <button class="btn go" data-open="post-cover">mandar meu cover</button>`;
 }
 function openCover(at) {
   const { el, fresh } = win("w-cover", "cover da semana", coverBody(), Math.min(290, desk.clientWidth - 24));
@@ -328,7 +328,7 @@ function postBody(cover) {
     <label for="f-city">cidade<input type="text" id="f-city" placeholder="BH"></label></div>
     <label for="f-inst">o que você faz no vídeo<select id="f-inst">${INSTR.map(i => `<option>${i}</option>`).join("")}</select></label>
     <label class="chk" for="f-cover"><input type="checkbox" id="f-cover"${cover ? " checked" : ""}> entrar no cover da semana</label>
-    <div class="row"><button class="btn primary" type="submit">jogar na mesa</button></div></form>`;
+    <div class="row"><button class="btn go" type="submit">jogar na mesa</button></div></form>`;
 }
 function openPost(cover) {
   const { el, fresh } = win("w-post", "postar", postBody(cover), Math.min(300, desk.clientWidth - 24));
@@ -346,11 +346,11 @@ function openVideo(p, from) {
   const body = `<div class="big"></div>
     <div class="row" style="justify-content:space-between;align-items:center"><button class="vote" data-vote="${p.id}" aria-pressed="${voted.has(p.id)}">▲ ${votesOf(p)}</button>
     <a class="btn" href="${esc(p.url)}" target="_blank" rel="noopener">abrir no ${netName(p)} ↗</a></div>
-    ${SANDBOX ? `<div class="muted" style="font-size:12px">a prévia do claude bloqueia players de fora. no site publicado o vídeo toca aqui.</div>` : ""}
-    <details><summary class="muted" style="font-size:12px;cursor:pointer">código do embed</summary><pre>${esc(embedCode(p))}</pre></details>`;
+    ${SANDBOX ? `<div class="muted" style="font-size:12px">A prévia do Claude bloqueia players de fora. No site publicado o vídeo toca aqui.</div>` : ""}
+    <details><summary>código do embed</summary><pre>${esc(embedCode(p))}</pre></details>`;
   const { el, fresh } = win("w-video", p.h, body, W);
   const big = el.querySelector(".big");
-  if (SANDBOX) { const cv = document.createElement("canvas"); big.appendChild(cv); paint(cv, p.id + p.h, 280, 373); }
+  if (SANDBOX) { big.innerHTML = placeholder(p); }
   else {
     const P = PLAYER[p.net], k = Math.min(1, inner / P.w), maxH = desk.clientHeight - 150;
     const h = Math.min(P.h * k, maxH);
@@ -363,24 +363,38 @@ function openVideo(p, from) {
   }
 }
 
+const DOODLES = {
+  arrow: `<svg width="120" height="70" viewBox="0 0 120 70"><path d="M4 60c22-6 48-18 70-38 8-7 14-12 22-15"/><path d="M84 4l14 2-6 13"/></svg>`,
+  star: `<svg width="46" height="46" viewBox="0 0 46 46"><path d="M23 3l5 14 15 1-12 9 5 15-13-9-12 9 4-15L3 18l15-1z"/></svg>`,
+  squiggle: `<svg width="110" height="24" viewBox="0 0 110 24"><path d="M3 14c8-10 14 8 22-1s14 8 22-1 14 8 22-1 14 8 22-1 9 5 14 2"/></svg>`,
+};
+function doodle(svg) { const el = document.createElement("div"); el.className = "item doodle"; el.innerHTML = svg; el.tabIndex = -1; return el; }
+
+// Entry: everything fades up from 0.95 with a short stagger, never from nothing.
+function enter(el, it, i) {
+  el.style.opacity = 0; it.ms.set(.95);
+  setTimeout(() => { el.style.transition = (el.style.transition ? el.style.transition + "," : "") + "opacity 240ms cubic-bezier(0.23,1,0.32,1)"; el.style.opacity = 1; it.ms.to(1, { response: .35 }); }, 40 + i * 45);
+}
+
 function build() {
   const W = desk.clientWidth, H = desk.clientHeight, narrow = W < 560;
   desk.style.setProperty("--pw", (narrow ? 130 : Math.min(190, Math.max(150, W / 8))) + "px");
-  place(note("make art<br>not content"), narrow ? W - 150 : W * .44, H - (narrow ? 130 : 170), rand(-7, 7));
-  place(note(`<b>exemplo real.</b> esses são vídeos públicos do instagram e do tiktok, puxados só pelo link. arrasta pela borda branca, aperta play no vídeo, ▲ é o voto.`, "paper"), 14, narrow ? H - 150 : 18, rand(-4, 3));
-  const loose = [
-    `<span class="stk star" style="background:var(--lemon);color:var(--on-lemon)">cover<br>da semana</span>`,
-    `<span class="stk round" style="background:var(--pink);color:#1d1d1f">banda<br>aberta</span>`,
-    `<span class="stk pill" style="background:var(--sky);color:#1d1d1f">less ego more noise</span>`,
-    `<span class="stk round" style="background:var(--orange);color:#fff">BR</span>`,
-  ];
-  posts().forEach((p, i) => {
-    const el = polaroid(p); desk.appendChild(el);
-    const { x, y } = scatterPos(el);
-    const it = place(el, x, y, rand(-9, 9));
-    it.my.set(y - 30); setTimeout(() => it.my.to(y, { damping: .65, response: .45 }), 30 + i * 50);
-  });
-  loose.forEach(h => { const el = sticker(h); desk.appendChild(el); const { x, y } = scatterPos(el); place(el, x, y, rand(-20, 20)); });
+  let i = 0;
+  const add = (el, x, y, r) => { const it = place(el, x, y, r); enter(el, it, i++); return it; };
+  add(note(`<b>exemplo real</b>Vídeos públicos do Instagram e do TikTok, puxados só pelo link. Arrasta pela borda, aperta play no vídeo e vota no ▲.`, "paper"), 14, narrow ? H - 150 : 16, rand(-3, 3));
+  posts().forEach(p => { const el = polaroid(p); desk.appendChild(el); const { x, y } = scatterPos(el); add(el, x, y, rand(-8, 8)); });
+  add(note("make art<br>not content"), narrow ? W - 160 : W * .42, H - (narrow ? 120 : 160), rand(-6, 6));
+  [
+    `<span class="stk round" style="background:var(--green-fill)">banda<br>aberta</span>`,
+    `<span class="stk pill" style="background:var(--yellow)">less ego, more noise</span>`,
+    `<span class="stk drop" style="background:var(--blue);color:#fff"><span>BR</span></span>`,
+    `<span class="stk round" style="background:var(--coral)">vem<br>tocar</span>`,
+  ].forEach(h => { const el = sticker(h); desk.appendChild(el); const { x, y } = scatterPos(el); add(el, x, y, rand(-18, 18)); });
+  if (!narrow) {
+    add(doodle(DOODLES.arrow), W - 440, 120, -6);
+    add(doodle(DOODLES.star), W * .3, H - 90, 0);
+    add(doodle(DOODLES.squiggle), 40, H - 60, -3);
+  }
   openCover(narrow ? { x: 10, y: H * .3 } : null);
   updateCount();
 }
@@ -434,8 +448,8 @@ function release(e) {
   }
   const b = bounds(el), vx = d.tx.velocity(), vy = d.ty.velocity();
   const clamp = (v, a, z) => Math.min(z, Math.max(a, v));
-  it.mx.to(clamp(it.x + Motion.project(vx, .99), b.minX, b.maxX), { velocity: vx, damping: .9, response: .5 });
-  it.my.to(clamp(it.y + Motion.project(vy, .99), b.minY, b.maxY), { velocity: vy, damping: .9, response: .5 });
+  it.mx.to(clamp(it.x + Motion.project(vx, .99), b.minX, b.maxX), { velocity: vx, damping: .8, response: .4 });
+  it.my.to(clamp(it.y + Motion.project(vy, .99), b.minY, b.maxY), { velocity: vy, damping: .8, response: .4 });
 }
 desk.addEventListener("pointerup", release);
 desk.addEventListener("pointercancel", release);
