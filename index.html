@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KVSH Studio</title>
+<style>
+/* Layout: one light screen, no scroll. An old desktop: menu bar on top, a pile of polaroids (real Reels/TikTok players), stickers and old windows you drag around. Single light look on purpose. */
+:root{
+  --desk:#f3f2ee; --dot:rgba(40,40,30,.09);
+  --card:#ffffff; --fill:#f2f2f5; --fill-hover:#e9e9ee;
+  --text:#1d1d1f; --text-2:#6e6e73; --sep:rgba(0,0,0,.08);
+  --lemon:#e6f53f; --on-lemon:#1d1d1f; --ink:#4f5e00; --ring:rgba(120,140,0,.35);
+  --pink:#ff8fc7; --sky:#8fd3ff; --orange:#ff9f43; --hot:#e0002a; --ok:#248a3d;
+  --win-line:#1d1d1f; --stripe:rgba(0,0,0,.5);
+  --shadow:0 1px 2px rgba(0,0,0,.08),0 6px 16px rgba(0,0,0,.08);
+  --shadow-lift:0 4px 10px rgba(0,0,0,.1),0 22px 44px rgba(0,0,0,.18);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--desk);color:var(--text);font:15px/1.4 var(--font);-webkit-font-smoothing:antialiased;overflow:hidden;display:flex;flex-direction:column}
+button,input,select{font:inherit;color:inherit}
+a{color:var(--ink)}
+[hidden]{display:none!important}
+
+.bar{flex:none;display:flex;align-items:center;gap:2px;padding:6px 16px;padding-top:calc(6px + env(safe-area-inset-top,0px));background:rgba(255,255,255,.8);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);box-shadow:0 1px 0 var(--sep);z-index:99999;overflow-x:auto;white-space:nowrap;font-size:14px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;margin-right:10px;letter-spacing:-.01em}
+.brand::before{content:"";width:16px;height:16px;border-radius:50% 50% 50% 8%;background:var(--lemon);transform:rotate(-45deg);box-shadow:inset -3px -3px 0 rgba(0,0,0,.08)}
+.mi{border:0;background:none;padding:4px 10px;border-radius:6px;cursor:pointer}
+.mi:hover,.mi:focus-visible{background:var(--text);color:#fff;outline:none}
+.bar .right{margin-left:auto;display:flex;gap:12px;align-items:center;color:var(--text-2);font-variant-numeric:tabular-nums;padding-left:12px}
+
+.desk{position:relative;flex:1;min-height:0;overflow:hidden;background-image:radial-gradient(var(--dot) 1px,transparent 1px);background-size:7px 7px;touch-action:none}
+.item{position:absolute;left:0;top:0;will-change:transform;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none;transition:box-shadow 180ms ease}
+.item.lifted{cursor:grabbing;box-shadow:var(--shadow-lift)!important}
+.item:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+/* while anything is being dragged, players stop eating the pointer */
+body.dragging iframe{pointer-events:none}
+
+/* polaroid with a real player inside */
+.pola{width:calc(var(--pw) + 20px);background:var(--card);padding:10px 10px 0;box-shadow:var(--shadow);border-radius:2px}
+.screen{position:relative;width:var(--pw);height:calc(var(--pw) * var(--ar));overflow:hidden;background:#111}
+.screen iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;background:#111}
+.screen canvas{display:block;width:100%;height:100%}
+.screen .play{position:absolute;left:50%;top:50%;translate:-50% -50%;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.88);display:grid;place-items:center}
+.screen .play::after{content:"";border-left:11px solid #111;border-block:7px solid transparent;margin-left:3px}
+.cap{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 2px 10px}
+.who{min-width:0;font-size:13px;line-height:1.25;cursor:pointer}
+.who b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.who span{color:var(--text-2);font-size:12px}
+.vote{flex:none;border:0;background:var(--fill);border-radius:99px;padding:4px 9px;font-size:12px;font-weight:600;cursor:pointer;font-variant-numeric:tabular-nums;transition:transform 120ms ease-out,background-color 150ms}
+.vote:hover{background:var(--fill-hover)}
+.vote:active{transform:scale(.92)}
+.vote[aria-pressed="true"]{background:var(--lemon);color:var(--on-lemon)}
+.tape{position:absolute;top:-10px;left:50%;width:58px;height:20px;translate:-50% 0;rotate:-4deg;background:rgba(230,245,63,.7);z-index:2}
+.tape.pink{background:rgba(255,143,199,.65);rotate:5deg;left:30%}
+
+/* stickers: on posts and loose on the desk */
+.stk{position:absolute;z-index:3;display:grid;place-items:center;text-align:center;font-weight:800;line-height:1;letter-spacing:-.02em;pointer-events:none;filter:drop-shadow(0 1px 1px rgba(0,0,0,.18))}
+.stk.round{width:58px;height:58px;border-radius:50%;border:3px solid #fff;font-size:12px}
+.stk.star{width:70px;height:70px;font-size:12px;clip-path:polygon(50% 0,61% 14%,79% 7%,80% 26%,98% 30%,88% 47%,100% 62%,82% 69%,82% 89%,63% 85%,50% 100%,37% 85%,18% 89%,18% 69%,0 62%,12% 47%,2% 30%,20% 26%,21% 7%,39% 14%)}
+.stk.pill{padding:6px 10px;border-radius:99px;border:2px solid #fff;font-size:12px}
+.loose{position:absolute}
+.loose .stk{position:static;pointer-events:auto}
+.loose.item{box-shadow:none}
+.loose.lifted{box-shadow:none!important}
+.loose.lifted .stk{filter:drop-shadow(0 10px 12px rgba(0,0,0,.25))}
+
+.note{width:170px;padding:14px 14px 18px;background:var(--lemon);color:var(--on-lemon);box-shadow:var(--shadow);font-weight:700;font-size:20px;line-height:1.05;letter-spacing:-.02em}
+.note.paper{font-size:13px;font-weight:500;line-height:1.35;letter-spacing:0;width:200px;background:#fff;color:var(--text)}
+.note.paper b{font-weight:700}
+
+.win{width:var(--ww,300px);background:var(--card);border:1.5px solid var(--win-line);box-shadow:3px 3px 0 var(--win-line)}
+.win.lifted{box-shadow:3px 3px 0 var(--win-line),var(--shadow-lift)!important}
+.tb{display:flex;align-items:center;gap:8px;height:24px;padding:5px 6px;border-bottom:1.5px solid var(--win-line);background:repeating-linear-gradient(to bottom,var(--stripe) 0 1px,transparent 1px 3px);background-clip:content-box}
+.tb .x{flex:none;width:13px;height:13px;border:1.5px solid var(--win-line);background:var(--card);padding:0;cursor:pointer}
+.tb .x:hover{background:var(--text)}
+.tb .t{margin:0 auto;padding:0 8px;background:var(--card);font-size:12px;font-weight:700;line-height:14px;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb .sp{width:13px;flex:none}
+.wb{padding:14px;display:grid;gap:10px;font-size:14px}
+.wb h2{margin:0;font-size:26px;line-height:1.05;letter-spacing:-.025em;font-weight:700}
+.muted{color:var(--text-2)}
+.specs{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--text-2);font-variant-numeric:tabular-nums}
+.specs b{color:var(--text)}
+.clock{font-size:12px;background:var(--fill);border-radius:8px;padding:6px 8px;font-variant-numeric:tabular-nums}
+.rk{display:grid;gap:2px;margin:0;padding:0;list-style:none}
+.rk li{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--sep)}
+.rk .n{font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.rk li:first-child .n{color:var(--hot)}
+.rk .w{min-width:0}
+.rk .w b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk .w span{font-size:12px;color:var(--text-2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:99px;padding:9px 16px;font-weight:600;font-size:14px;cursor:pointer;background:var(--fill);text-decoration:none;color:var(--text);transition:transform 120ms ease-out}
+.btn:active{transform:scale(.96)}
+.btn.primary{background:var(--text);color:#fff}
+.btn.lemon{background:var(--lemon);color:var(--on-lemon)}
+.btn:focus-visible,.vote:focus-visible,.mi:focus-visible,.tb .x:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.big{position:relative;width:100%;overflow:hidden;background:#111;border-radius:2px}
+.big iframe{display:block;width:100%;border:0}
+.big canvas{display:block;width:100%;aspect-ratio:9/12;max-height:30vh;object-fit:cover}
+
+.wb label{display:grid;gap:4px;font-size:13px;font-weight:600}
+.wb input[type=text],.wb input[type=url],.wb select{width:100%;background:var(--fill);border:1px solid transparent;border-radius:10px;padding:9px 11px;font-size:15px;appearance:none}
+.wb input:focus,.wb select:focus{outline:none;background:var(--card);border-color:var(--ink);box-shadow:0 0 0 4px var(--ring)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.det{font-size:12px;min-height:16px;color:var(--text-2)}
+.det.ok{color:var(--ok)}.det.err{color:var(--hot)}
+.chk{display:flex!important;align-items:center;gap:8px;font-weight:500!important;cursor:pointer}
+.chk input{accent-color:var(--ink);width:16px;height:16px}
+.row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+pre{margin:0;background:var(--fill);border-radius:8px;padding:8px;font:11px/1.45 var(--mono);overflow-x:auto;white-space:pre;user-select:text}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));translate:-50% 0;background:var(--text);color:#fff;padding:9px 16px;border-radius:99px;font-size:14px;font-weight:600;z-index:100000}
+@media (max-width:560px){.bar{padding-inline:12px;font-size:13px}.mi{padding:4px 7px}.note{width:140px;font-size:17px}}
+</style>
+</head>
+<body>
+<div class="bar" role="menubar" aria-label="Menu">
+  <span class="brand">kvsh studio</span>
+  <button class="mi" role="menuitem" id="m-post">postar</button>
+  <button class="mi" role="menuitem" id="m-cover">cover da semana</button>
+  <button class="mi" role="menuitem" id="m-tidy">arrumar</button>
+  <button class="mi" role="menuitem" id="m-mess">bagunçar</button>
+  <span class="right"><span id="count"></span><span id="time"></span></span>
+</div>
+<div class="desk" id="desk"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+// Molas do site da Lemon Drops (js/spring.js).
+const Motion = (() => {
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+  function spring({ from, to, velocity = 0, damping = 1, response = 0.4, precision = 0.25, onUpdate, onDone }) {
+    const k = (2 * Math.PI / response) ** 2, c = (4 * Math.PI * damping) / response;
+    let x = from, v = velocity, last = performance.now(), id = 0, done = false;
+    const ctl = { get value() { return x; }, get velocity() { return v; }, get done() { return done; }, stop() { cancelAnimationFrame(id); done = true; } };
+    const finish = () => { x = to; v = 0; done = true; onUpdate(to); onDone && onDone(); };
+    if (reduced.matches || document.hidden) { finish(); return ctl; }
+    function step(now) {
+      const dt = Math.min(0.064, (now - last) / 1000); last = now;
+      const n = Math.max(1, Math.ceil(dt / 0.004)), h = dt / n;
+      for (let i = 0; i < n; i++) { v += (-k * (x - to) - c * v) * h; x += v * h; }
+      if (Math.abs(v) < precision * 4 && Math.abs(x - to) < precision) return finish();
+      onUpdate(x); id = requestAnimationFrame(step);
+    }
+    id = requestAnimationFrame(step);
+    return ctl;
+  }
+  function value(initial, onUpdate) {
+    let cur = initial, anim = null;
+    const self = {
+      get() { return anim && !anim.done ? anim.value : cur; },
+      velocity() { return anim && !anim.done ? anim.velocity : 0; },
+      set(x) { if (anim) anim.stop(); anim = null; cur = x; onUpdate(x); },
+      to(target, opts = {}) {
+        const from = self.get(), velocity = opts.velocity !== undefined ? opts.velocity : self.velocity();
+        if (anim) anim.stop();
+        anim = spring({ ...opts, from, to: target, velocity, onUpdate: (x) => { cur = x; onUpdate(x); }, onDone: opts.onDone });
+        return anim;
+      },
+    };
+    return self;
+  }
+  function tracker() {
+    const pts = [];
+    return {
+      add(p) { const t = performance.now(); pts.push({ p, t }); while (pts.length > 2 && t - pts[0].t > 100) pts.shift(); },
+      velocity() { if (pts.length < 2) return 0; const a = pts[0], b = pts[pts.length - 1]; const dt = (b.t - a.t) / 1000; return dt > 0 ? (b.p - a.p) / dt : 0; },
+    };
+  }
+  const project = (v, d = 0.998) => ((v / 1000) * d) / (1 - d);
+  return { spring, value, tracker, project };
+})();
+
+// Inside the Claude preview, outside players are blocked, so posts fall back to a drawn still that links out.
+const SANDBOX = (() => { try { return window.top !== window.self; } catch (e) { return true; } })() || /claude|anthropic/i.test(location.hostname + " " + (location.ancestorOrigins ? [...location.ancestorOrigins].join(" ") : ""));
+
+const INSTR = ["vocal","guitarra","baixo","bateria","percussão","teclado","sax","violino","trompete","produção"];
+const COVER = { song: "cante por nós", by: "KVSH, Vintage Culture, Breno Miranda", bpm: 122, key: "lá menor", week: 40 };
+// Real public posts, standing in for submissions until musicians send their own.
+const SEED = [
+  { id:"r1", net:"tiktok", vid:"7613791347987778817", url:"https://www.tiktok.com/@kvshtok/video/7613791347987778817", h:"@kvshtok", city:"BH", inst:"produção", cover:true, votes:512, stk:["lemon"] },
+  { id:"r2", net:"tiktok", vid:"7410470020356050208", url:"https://www.tiktok.com/@jakesax/video/7410470020356050208", h:"@jakesax", city:"—", inst:"sax", cover:true, votes:388, stk:["top"] },
+  { id:"r3", net:"instagram", vid:"C8CaBfWs1mr", url:"https://www.instagram.com/reel/C8CaBfWs1mr/", h:"@anthonybutenyi", city:"—", inst:"trompete", cover:true, votes:341 },
+  { id:"r4", net:"tiktok", vid:"7374021398081162504", url:"https://www.tiktok.com/@yarden_saxophone/video/7374021398081162504", h:"@yarden_saxophone", city:"—", inst:"sax", cover:true, votes:297, stk:["fogo"] },
+  { id:"r5", net:"instagram", vid:"DKcalTzoftf", url:"https://www.instagram.com/reel/DKcalTzoftf/", h:"@martingarrix", city:"—", inst:"produção", cover:false, votes:260 },
+  { id:"r6", net:"tiktok", vid:"7397040267813080336", url:"https://www.tiktok.com/@thedrumpath/video/7397040267813080336", h:"@thedrumpath", city:"—", inst:"bateria", cover:true, votes:214, stk:["novo"] },
+  { id:"r7", net:"instagram", vid:"DQCkNLtgqEe", url:"https://www.instagram.com/reel/DQCkNLtgqEe/", h:"@teddysphotos", city:"—", inst:"vocal", cover:false, votes:198 },
+  { id:"r8", net:"instagram", vid:"DOJukicCQ2_", url:"https://www.instagram.com/reel/DOJukicCQ2_/", h:"@karanaujla", city:"—", inst:"vocal", cover:false, votes:152 },
+];
+const STICKERS = {
+  lemon: `<span class="stk round" style="background:var(--lemon);color:var(--on-lemon);right:-14px;top:-14px;rotate:12deg">lemon<br>drops</span>`,
+  top: `<span class="stk star" style="background:var(--orange);color:#fff;left:-18px;top:30%;rotate:-14deg">top<br>1</span>`,
+  fogo: `<span class="stk pill" style="background:var(--pink);color:#1d1d1f;right:-10px;bottom:56px;rotate:-8deg">tá pegando fogo</span>`,
+  novo: `<span class="stk round" style="background:var(--sky);color:#1d1d1f;left:-12px;bottom:60px;rotate:-10deg">novo</span>`,
+};
+
+const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+let mine = store.get("kvsh.posts2", []);
+const voted = new Set(store.get("kvsh.voted2", []));
+const posts = () => [...mine, ...SEED];
+const votesOf = p => p.votes + (voted.has(p.id) ? 1 : 0);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const rand = (a, b) => a + Math.random() * (b - a);
+const netName = p => p.net === "instagram" ? "instagram" : "tiktok";
+
+// Native player sizes. Instagram's embed includes its header and footer; TikTok's player is just the video.
+const PLAYER = {
+  instagram: { w: 326, h: 580, src: p => `https://www.instagram.com/reel/${p.vid}/embed/` },
+  tiktok: { w: 324, h: 576, src: p => `https://www.tiktok.com/player/v1/${p.vid}?description=0&music_info=0&rel=0` },
+};
+
+const desk = document.getElementById("desk");
+let z = 10;
+const items = new Map();
+
+function place(el, x, y, r, { drop = false } = {}) {
+  if (el.parentNode !== desk) desk.appendChild(el);
+  const it = { el, x, y, r, s: 1 };
+  const apply = () => { el.style.transform = `translate3d(${it.x}px,${it.y}px,0) rotate(${it.r}deg) scale(${it.s})`; };
+  it.mx = Motion.value(x, v => { it.x = v; apply(); });
+  it.my = Motion.value(drop ? y - 80 : y, v => { it.y = v; apply(); });
+  it.mr = Motion.value(r, v => { it.r = v; apply(); });
+  it.ms = Motion.value(1, v => { it.s = v; apply(); });
+  apply();
+  if (drop) it.my.to(y, { damping: .6, response: .5 });
+  el.style.zIndex = ++z;
+  if (el.tabIndex < 0) el.tabIndex = 0;
+  items.set(el, it);
+  return it;
+}
+function bounds(el) {
+  const W = desk.clientWidth, H = desk.clientHeight, w = el.offsetWidth, h = el.offsetHeight;
+  return { minX: -w * .35, maxX: W - w * .65, minY: -h * .15, maxY: H - h * .4, W, H, w, h };
+}
+function scatterPos(el) {
+  const b = bounds(el);
+  return { x: rand(0, Math.max(0, b.W - b.w)), y: rand(0, Math.max(0, b.H - b.h * .75)) };
+}
+
+function paint(cv, seedStr, w = 220, h = 390) {
+  cv.width = w; cv.height = h;
+  const c = cv.getContext("2d");
+  let s = [...seedStr].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 9);
+  const rnd = () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296;
+  c.fillStyle = `hsl(${rnd()*360} 25% 10%)`; c.fillRect(0, 0, w, h);
+  c.globalCompositeOperation = "lighter";
+  for (let i = 0; i < 3; i++) {
+    const x = rnd() * w, y = rnd() * h * .7, rad = w * (.3 + rnd() * .5), hue = rnd() * 360;
+    const g = c.createRadialGradient(x, y, 0, x, y, rad);
+    g.addColorStop(0, `hsla(${hue} 80% 55% / .55)`); g.addColorStop(1, "transparent");
+    c.fillStyle = g; c.fillRect(0, 0, w, h);
+  }
+  c.globalCompositeOperation = "source-over";
+  c.fillStyle = "rgba(0,0,0,.7)";
+  const cx = w * (.35 + rnd() * .3);
+  c.beginPath(); c.arc(cx, h * .55, w * .12, 0, Math.PI * 2); c.fill();
+  c.beginPath(); c.ellipse(cx, h * 1.02, w * .32, h * .36, 0, 0, Math.PI * 2); c.fill();
+}
+
+// Fits a native-size player into a box by scaling it, so the real controls still work.
+function playerInto(box, p, width) {
+  const P = PLAYER[p.net], k = width / P.w;
+  box.style.setProperty("--ar", P.h / P.w);
+  if (SANDBOX) {
+    const cv = document.createElement("canvas"); box.appendChild(cv); paint(cv, p.id + p.h);
+    box.insertAdjacentHTML("beforeend", `<span class="play"></span>`);
+    return;
+  }
+  const f = document.createElement("iframe");
+  f.src = P.src(p); f.width = P.w; f.height = P.h; f.loading = "lazy";
+  f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen"; f.allowFullscreen = true;
+  f.title = `${netName(p)} de ${p.h}`;
+  f.style.transform = `scale(${k})`;
+  box.appendChild(f);
+}
+
+function polaroid(p) {
+  const el = document.createElement("div");
+  el.className = "item pola"; el.dataset.post = p.id;
+  el.setAttribute("aria-label", `${p.h}, ${p.inst}. Enter abre, setas movem`);
+  const tape = Math.random() < .5 ? `<span class="tape${Math.random() < .4 ? " pink" : ""}"></span>` : "";
+  el.innerHTML = `${tape}<div class="screen"></div>
+    <div class="cap"><div class="who" data-open-post="${p.id}"><b>${esc(p.h)}</b><span>${esc(p.inst)} · ${netName(p)}</span></div>
+    <button class="vote" data-vote="${p.id}" aria-pressed="${voted.has(p.id)}">▲ ${votesOf(p)}</button></div>
+    ${(p.stk || []).map(k => STICKERS[k] || "").join("")}`;
+  const pw = parseFloat(getComputedStyle(desk).getPropertyValue("--pw")) || 180;
+  playerInto(el.querySelector(".screen"), p, pw);
+  return el;
+}
+function note(html, cls = "") { const el = document.createElement("div"); el.className = "item note " + cls; el.innerHTML = html; return el; }
+function sticker(html) { const el = document.createElement("div"); el.className = "item loose"; el.innerHTML = html; return el; }
+function win(id, title, body, width) {
+  let el = document.getElementById(id);
+  if (el) { el.querySelector(".tb .t").textContent = title; el.querySelector(".wb").innerHTML = body; front(el); return { el, fresh: false }; }
+  el = document.createElement("div");
+  el.className = "item win"; el.id = id; el.style.setProperty("--ww", width + "px");
+  el.innerHTML = `<div class="tb"><button class="x" aria-label="Fechar"></button><span class="t">${esc(title)}</span><span class="sp"></span></div><div class="wb">${body}</div>`;
+  return { el, fresh: true };
+}
+function front(el) { el.style.zIndex = ++z; }
+function closeItem(el) {
+  const it = items.get(el); if (!it) return;
+  it.ms.to(.85, { response: .2 }); el.style.transition = "opacity 160ms"; el.style.opacity = 0;
+  setTimeout(() => { el.remove(); items.delete(el); }, 170);
+}
+
+function coverBody() {
+  const list = posts().filter(p => p.cover).sort((a, b) => votesOf(b) - votesOf(a)).slice(0, 5);
+  return `<div class="muted">semana ${COVER.week}</div><h2>${COVER.song}</h2><div class="muted">${COVER.by}</div>
+    <div class="specs"><span>bpm <b>${COVER.bpm}</b></span><span>tom <b>${COVER.key}</b></span><span>vídeo <b>9:16, até 90s</b></span></div>
+    <div class="clock" data-clock></div>
+    <ol class="rk">${list.map((p, i) => `<li><span class="n">${i + 1}</span><span class="w"><b>${esc(p.h)}</b><span>${esc(p.inst)} · ${netName(p)}</span></span><button class="vote" data-vote="${p.id}" aria-pressed="${voted.has(p.id)}">▲ ${votesOf(p)}</button></li>`).join("")}</ol>
+    <button class="btn lemon" data-open="post-cover">mandar meu cover</button>`;
+}
+function openCover(at) {
+  const { el, fresh } = win("w-cover", "cover da semana", coverBody(), Math.min(290, desk.clientWidth - 24));
+  if (fresh) place(el, at?.x ?? Math.max(8, desk.clientWidth - 310), at?.y ?? 18, rand(-1.5, 1.5), { drop: true });
+  tick();
+}
+function postBody(cover) {
+  return `<form id="pf" novalidate style="display:grid;gap:10px">
+    <label for="f-url">link do reels ou tiktok<input type="url" id="f-url" placeholder="cola aqui" autocomplete="off"></label>
+    <div class="det" id="det" aria-live="polite"></div>
+    <div class="two"><label for="f-h">seu @<input type="text" id="f-h" placeholder="@voce"></label>
+    <label for="f-city">cidade<input type="text" id="f-city" placeholder="BH"></label></div>
+    <label for="f-inst">o que você faz no vídeo<select id="f-inst">${INSTR.map(i => `<option>${i}</option>`).join("")}</select></label>
+    <label class="chk" for="f-cover"><input type="checkbox" id="f-cover"${cover ? " checked" : ""}> entrar no cover da semana</label>
+    <div class="row"><button class="btn primary" type="submit">jogar na mesa</button></div></form>`;
+}
+function openPost(cover) {
+  const { el, fresh } = win("w-post", "postar", postBody(cover), Math.min(300, desk.clientWidth - 24));
+  if (fresh) place(el, Math.max(8, (desk.clientWidth - 300) / 2 + rand(-30, 30)), Math.max(8, desk.clientHeight * .1), rand(-2, 2), { drop: true });
+  front(el);
+  setTimeout(() => el.querySelector("#f-url")?.focus({ preventScroll: true }), 60);
+}
+function embedCode(p) {
+  return p.net === "instagram"
+    ? `<blockquote class="instagram-media"\n  data-instgrm-permalink="${p.url}"></blockquote>\n<script async src="//www.instagram.com/embed.js"><\/script>`
+    : `<iframe src="https://www.tiktok.com/player/v1/${p.vid}"\n  width="324" height="576" allow="autoplay; fullscreen"></iframe>`;
+}
+function openVideo(p, from) {
+  const W = Math.min(340, desk.clientWidth - 24), inner = W - 28;
+  const body = `<div class="big"></div>
+    <div class="row" style="justify-content:space-between;align-items:center"><button class="vote" data-vote="${p.id}" aria-pressed="${voted.has(p.id)}">▲ ${votesOf(p)}</button>
+    <a class="btn" href="${esc(p.url)}" target="_blank" rel="noopener">abrir no ${netName(p)} ↗</a></div>
+    ${SANDBOX ? `<div class="muted" style="font-size:12px">a prévia do claude bloqueia players de fora. no site publicado o vídeo toca aqui.</div>` : ""}
+    <details><summary class="muted" style="font-size:12px;cursor:pointer">código do embed</summary><pre>${esc(embedCode(p))}</pre></details>`;
+  const { el, fresh } = win("w-video", p.h, body, W);
+  const big = el.querySelector(".big");
+  if (SANDBOX) { const cv = document.createElement("canvas"); big.appendChild(cv); paint(cv, p.id + p.h, 280, 373); }
+  else {
+    const P = PLAYER[p.net], k = Math.min(1, inner / P.w), maxH = desk.clientHeight - 150;
+    const h = Math.min(P.h * k, maxH);
+    big.style.height = h + "px";
+    big.innerHTML = `<iframe src="${P.src(p)}" width="${P.w}" height="${P.h}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen style="transform:scale(${k});transform-origin:0 0;width:${P.w}px;height:${P.h}px" title="${netName(p)} de ${esc(p.h)}"></iframe>`;
+  }
+  if (fresh) {
+    const x = Math.min(Math.max(8, (from?.x ?? desk.clientWidth / 2) + 30), desk.clientWidth - W - 8);
+    place(el, x, 10, rand(-1, 1), { drop: true });
+  }
+}
+
+function build() {
+  const W = desk.clientWidth, H = desk.clientHeight, narrow = W < 560;
+  desk.style.setProperty("--pw", (narrow ? 130 : Math.min(190, Math.max(150, W / 8))) + "px");
+  place(note("make art<br>not content"), narrow ? W - 150 : W * .44, H - (narrow ? 130 : 170), rand(-7, 7));
+  place(note(`<b>exemplo real.</b> esses são vídeos públicos do instagram e do tiktok, puxados só pelo link. arrasta pela borda branca, aperta play no vídeo, ▲ é o voto.`, "paper"), 14, narrow ? H - 150 : 18, rand(-4, 3));
+  const loose = [
+    `<span class="stk star" style="background:var(--lemon);color:var(--on-lemon)">cover<br>da semana</span>`,
+    `<span class="stk round" style="background:var(--pink);color:#1d1d1f">banda<br>aberta</span>`,
+    `<span class="stk pill" style="background:var(--sky);color:#1d1d1f">less ego more noise</span>`,
+    `<span class="stk round" style="background:var(--orange);color:#fff">BR</span>`,
+  ];
+  posts().forEach((p, i) => {
+    const el = polaroid(p); desk.appendChild(el);
+    const { x, y } = scatterPos(el);
+    const it = place(el, x, y, rand(-9, 9));
+    it.my.set(y - 30); setTimeout(() => it.my.to(y, { damping: .65, response: .45 }), 30 + i * 50);
+  });
+  loose.forEach(h => { const el = sticker(h); desk.appendChild(el); const { x, y } = scatterPos(el); place(el, x, y, rand(-20, 20)); });
+  openCover(narrow ? { x: 10, y: H * .3 } : null);
+  updateCount();
+}
+function tidy() {
+  const els = [...items.keys()].filter(el => el.classList.contains("pola"));
+  const W = desk.clientWidth, w = els[0]?.offsetWidth || 180, gap = 16;
+  const cols = Math.max(1, Math.floor((W - 16) / (w + gap)));
+  const left = (W - (cols * (w + gap) - gap)) / 2;
+  els.forEach((el, i) => {
+    const it = items.get(el);
+    it.mx.to(left + (i % cols) * (w + gap), { response: .45 });
+    it.my.to(16 + Math.floor(i / cols) * (el.offsetHeight + gap), { response: .45 });
+    it.mr.to(0, { response: .4 }); el.style.zIndex = 10 + i;
+  });
+}
+function mess() {
+  [...items.keys()].forEach((el, i) => {
+    const it = items.get(el), { x, y } = scatterPos(el);
+    setTimeout(() => { it.mx.to(x, { damping: .75, response: .55 }); it.my.to(y, { damping: .75, response: .55 }); it.mr.to(rand(-10, 10), { damping: .8, response: .5 }); }, i * 18);
+  });
+}
+
+// Drag: the item keeps its tilt while held (no spinning), springs carry the throw on release.
+let drag = null;
+desk.addEventListener("pointerdown", e => {
+  const el = e.target.closest(".item");
+  if (!el || e.button > 0) return;
+  if (e.target.closest("button,a,input,select,label,textarea,summary,pre")) { front(el); return; }
+  const it = items.get(el); if (!it) return;
+  e.preventDefault();
+  el.setPointerCapture(e.pointerId);
+  front(el); el.classList.add("lifted"); document.body.classList.add("dragging");
+  it.ms.to(1.03, { response: .25 });
+  drag = { el, it, id: e.pointerId, ox: e.clientX - it.mx.get(), oy: e.clientY - it.my.get(), sx: e.clientX, sy: e.clientY, moved: false, tx: Motion.tracker(), ty: Motion.tracker() };
+});
+desk.addEventListener("pointermove", e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 4) drag.moved = true;
+  const x = e.clientX - drag.ox, y = e.clientY - drag.oy;
+  drag.it.mx.set(x); drag.it.my.set(y); drag.tx.add(x); drag.ty.add(y);
+});
+function release(e) {
+  if (!drag || e.pointerId !== drag.id) return;
+  const { el, it } = drag, d = drag; drag = null;
+  el.classList.remove("lifted"); document.body.classList.remove("dragging");
+  it.ms.to(1, { response: .3 });
+  if (!d.moved) {
+    const p = el.dataset.post && posts().find(q => q.id === el.dataset.post);
+    if (p) openVideo(p, { x: it.x + el.offsetWidth * .6, y: it.y });
+    return;
+  }
+  const b = bounds(el), vx = d.tx.velocity(), vy = d.ty.velocity();
+  const clamp = (v, a, z) => Math.min(z, Math.max(a, v));
+  it.mx.to(clamp(it.x + Motion.project(vx, .99), b.minX, b.maxX), { velocity: vx, damping: .9, response: .5 });
+  it.my.to(clamp(it.y + Motion.project(vy, .99), b.minY, b.maxY), { velocity: vy, damping: .9, response: .5 });
+}
+desk.addEventListener("pointerup", release);
+desk.addEventListener("pointercancel", release);
+
+desk.addEventListener("keydown", e => {
+  const el = e.target.closest(".item"); if (!el || e.target !== el) return;
+  const it = items.get(el), step = e.shiftKey ? 40 : 12;
+  const mv = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+  if (mv) { e.preventDefault(); front(el); it.mx.to(it.mx.get() + mv[0]); it.my.to(it.my.get() + mv[1]); }
+  if (e.key === "Enter" && el.dataset.post) { const p = posts().find(q => q.id === el.dataset.post); if (p) openVideo(p, { x: it.x, y: it.y }); }
+});
+
+document.addEventListener("click", e => {
+  const v = e.target.closest("[data-vote]");
+  if (v) {
+    const id = v.dataset.vote; voted.has(id) ? voted.delete(id) : voted.add(id); store.set("kvsh.voted2", [...voted]);
+    const p = posts().find(q => q.id === id);
+    document.querySelectorAll(`[data-vote="${id}"]`).forEach(b => { b.textContent = "▲ " + votesOf(p); b.setAttribute("aria-pressed", voted.has(id)); });
+    if (document.getElementById("w-cover") && p.cover) openCover();
+    return;
+  }
+  const x = e.target.closest(".tb .x"); if (x) { closeItem(x.closest(".item")); return; }
+  const o = e.target.closest("[data-open]"); if (o) { openPost(o.dataset.open === "post-cover"); return; }
+});
+document.getElementById("m-post").onclick = () => openPost(false);
+document.getElementById("m-cover").onclick = () => openCover();
+document.getElementById("m-tidy").onclick = tidy;
+document.getElementById("m-mess").onclick = mess;
+
+function parseLink(raw) {
+  let u; try { u = new URL(raw.trim()); } catch (e) { return { error: "isso não parece um link. copia pelo botão compartilhar do app." }; }
+  const h = u.hostname.replace(/^www\.|^m\./, "");
+  if (h === "instagram.com") {
+    const m = u.pathname.match(/^\/(?:[^/]+\/)?(reel|reels|p|tv)\/([A-Za-z0-9_-]+)/);
+    return m ? { net: "instagram", vid: m[2], url: `https://www.instagram.com/reel/${m[2]}/` } : { error: "esse é o link do perfil. precisa ser o link do reels." };
+  }
+  if (h === "tiktok.com") {
+    const m = u.pathname.match(/^\/@([^/]+)\/video\/(\d+)/);
+    return m ? { net: "tiktok", vid: m[2], h: "@" + m[1], url: `https://www.tiktok.com/@${m[1]}/video/${m[2]}` } : { error: "esse é o link do perfil. precisa ser o link do vídeo." };
+  }
+  if (h === "vm.tiktok.com" || h === "vt.tiktok.com") return { error: "link curto do tiktok: abre ele no navegador e copia o link completo (com /video/)." };
+  return { error: "por enquanto só instagram e tiktok." };
+}
+document.addEventListener("input", e => {
+  if (e.target.id !== "f-url") return;
+  const det = document.getElementById("det"), val = e.target.value.trim();
+  if (!val) { det.textContent = ""; det.className = "det"; return; }
+  const r = parseLink(val);
+  det.className = "det " + (r.error ? "err" : "ok");
+  det.textContent = r.error || `${netName(r)} reconhecido`;
+  const hIn = document.getElementById("f-h"); if (r.h && !hIn.value) hIn.value = r.h;
+});
+document.addEventListener("submit", e => {
+  if (e.target.id !== "pf") return;
+  e.preventDefault();
+  const det = document.getElementById("det"), r = parseLink(document.getElementById("f-url").value);
+  if (r.error) { det.className = "det err"; det.textContent = r.error; document.getElementById("f-url").focus(); return; }
+  let h = document.getElementById("f-h").value.trim();
+  if (!h) { det.className = "det err"; det.textContent = "falta o seu @."; document.getElementById("f-h").focus(); return; }
+  if (!h.startsWith("@")) h = "@" + h;
+  const p = { id: "u" + Date.now(), net: r.net, vid: r.vid, url: r.url, h, city: document.getElementById("f-city").value.trim() || "—", inst: document.getElementById("f-inst").value, cover: document.getElementById("f-cover").checked, votes: 0, stk: ["novo"] };
+  mine.unshift(p); store.set("kvsh.posts2", mine);
+  const w = document.getElementById("w-post"), wi = items.get(w);
+  place(polaroid(p), wi ? wi.x + 40 : desk.clientWidth / 2 - 90, wi ? wi.y + 20 : 40, rand(-7, 7), { drop: true });
+  closeItem(w);
+  if (p.cover && document.getElementById("w-cover")) openCover();
+  updateCount(); toast(p.cover ? "tá na mesa e no cover" : "tá na mesa");
+});
+
+function tick() {
+  const now = new Date(), end = new Date(now); end.setDate(now.getDate() + ((7 - now.getDay()) % 7)); end.setHours(23, 59, 59, 0);
+  const t = Math.max(0, end - now), d = Math.floor(t / 864e5), h = Math.floor(t / 36e5) % 24, m = Math.floor(t / 6e4) % 60;
+  document.querySelectorAll("[data-clock]").forEach(el => el.textContent = `votação fecha domingo 23:59 · faltam ${d}d ${h}h ${m}min`);
+  document.getElementById("time").textContent = now.toLocaleDateString("pt-BR", { weekday: "short" }) + " " + now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+}
+function updateCount() { document.getElementById("count").textContent = posts().length + " vídeos na mesa"; }
+function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2400); }
+setInterval(tick, 20000);
+build(); tick();
+</script>
+</body>
+</html>
