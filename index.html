@@ -25,44 +25,73 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{color:var(--ink);font:15px/1.45 var(--body);-webkit-font-smoothing:antialiased;overflow:hidden;display:flex;flex-direction:column;
+body{color:var(--ink);font:15px/1.45 var(--body);-webkit-font-smoothing:antialiased;overflow:hidden;display:flex;flex-direction:row;
   background:#dcc6a0 repeating-linear-gradient(176deg,rgba(120,80,40,.07) 0 2px,transparent 2px 11px,rgba(255,240,215,.08) 11px 17px,transparent 17px 29px)}
-#table{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;pointer-events:none}
+#table,#things{position:fixed;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+#table{z-index:0}
+/* the carabiner, markers and pin are drawn on their own layer, above the polaroids and below open windows */
+#things{z-index:2}
+body.grab3d .stage,body.grab3d .stage *{cursor:grab!important}
+body.hold3d .stage,body.hold3d .stage *{cursor:grabbing!important}
 button,input,select,textarea{font:inherit;color:inherit}
 a{color:var(--moss)}
 [hidden]{display:none!important}
 
-/* menu */
-.top{flex:none;position:relative;z-index:99999;background:var(--paper);border-bottom:2px solid var(--ink);box-shadow:0 5px 0 rgba(70,45,20,.18)}
-.bar,.feedbar{display:flex;align-items:center;gap:4px;padding:6px 16px;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
-.bar::-webkit-scrollbar,.feedbar::-webkit-scrollbar{display:none}
-.bar{padding-top:calc(8px + env(safe-area-inset-top,0px))}
-.feedbar{border-top:1.5px dashed var(--line);padding-bottom:7px}
-.brand{font-family:var(--crayon);font-size:26px;line-height:1;margin-right:10px;display:flex;align-items:center;gap:8px}
-.brand img{width:34px;height:34px;border-radius:50%;box-shadow:2px 3px 0 rgba(70,45,20,.25)}
-.mi{border:0;background:none;padding:5px 10px;border-radius:var(--doodle);cursor:pointer;font-weight:500;transition:transform 160ms var(--ease-out),background-color 150ms ease}
-.mi:active{transform:scale(.97)}
-@media (hover:hover) and (pointer:fine){.mi:hover{background:var(--moss-fill)}}
-.mi:focus-visible,.chip:focus-visible,.timer:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.right{margin-left:auto;display:flex;gap:8px;align-items:center;padding-left:12px}
-.count{color:var(--grey);font-size:13px;font-variant-numeric:tabular-nums}
-.me{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--ink);background:var(--white);border-radius:var(--doodle);padding:4px 12px 4px 5px;cursor:pointer;font-weight:700;font-size:14px;transition:transform 160ms var(--ease-out),background-color 150ms ease}
-.me:active{transform:scale(.97)}
-@media (hover:hover) and (pointer:fine){.me:hover{background:var(--moss-fill)}}
-.av{flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--mist);font-family:var(--crayon);font-weight:400;font-size:16px;line-height:1}
-.me.in .av{background:var(--moss);color:var(--paper)}
-.lbl{font-family:var(--crayon);font-size:20px;line-height:1;margin-right:6px}
-.chip{border:1.5px solid var(--ink);background:var(--white);border-radius:var(--doodle);padding:3px 11px 4px;font-size:13px;font-weight:500;cursor:pointer;transition:transform 160ms var(--ease-out),background-color 150ms ease,color 150ms ease}
-.chip:active{transform:scale(.97)}
-.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
-@media (hover:hover) and (pointer:fine){.chip:not([aria-pressed="true"]):hover{background:var(--moss-fill)}}
-.timer{display:inline-flex;align-items:center;gap:6px;margin-left:10px;border:0;background:none;padding:3px 6px;border-radius:var(--doodle);cursor:pointer;font-size:13px;color:var(--grey);font-variant-numeric:tabular-nums;transition:transform 160ms var(--ease-out)}
+/* menu: paper things stuck to the left edge of the table */
+.side{flex:none;position:relative;z-index:5;width:214px;display:flex;flex-direction:column;align-items:flex-start;gap:14px;padding:16px 10px 18px 18px;padding-top:calc(16px + env(safe-area-inset-top,0px));overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.side::-webkit-scrollbar{display:none}
+.brand{display:flex;align-items:center;gap:10px}
+.brand img{width:72px;height:72px;border-radius:50%;box-shadow:4px 6px 0 rgba(70,45,20,.22);rotate:-4deg}
+.brand .count{font-family:var(--crayon);font-size:17px;line-height:1;color:var(--ink);opacity:.7;max-width:70px}
+.memo{position:relative;display:grid;gap:3px;width:136px;text-align:left;border:0;padding:16px 13px 14px;border-radius:2px;cursor:pointer;color:var(--ink);box-shadow:var(--shadow);transition:transform 180ms var(--ease-out),box-shadow 180ms var(--ease-out)}
+.memo::before{content:"";position:absolute;top:-9px;left:50%;width:54px;height:18px;translate:-50% 0;rotate:-3deg;background:rgba(240,234,222,.8);box-shadow:0 1px 1px rgba(70,45,20,.12);clip-path:polygon(3% 0,97% 4%,100% 50%,96% 100%,2% 96%,0 45%)}
+.memo b{font-family:var(--crayon);font-weight:400;font-size:26px;line-height:.92}
+.memo span{font-size:12px;opacity:.75}
+.memo.y{background:var(--yellow);rotate:-2.5deg}
+.memo.l{background:var(--lilac);rotate:2deg;margin-left:10px}
+.memo.g{background:var(--green-fill);rotate:-1.2deg}
+@media (hover:hover) and (pointer:fine){.memo:hover{transform:translateY(-3px);box-shadow:7px 11px 0 rgba(70,45,20,.18)}}
+.memo:active{transform:scale(.97)}
+.memo:focus-visible,.tab:focus-visible,.tag:focus-visible,.small button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.lbl{font-family:var(--crayon);font-size:22px;line-height:1;margin:4px 0 -4px 2px}
+.tabs-side{display:flex;flex-direction:column;align-items:flex-start;gap:7px}
+/* masking-tape labels; the one in use gets a hand-drawn circle */
+.tab{position:relative;white-space:nowrap;border:0;padding:5px 14px 6px;font-family:var(--crayon);font-size:20px;line-height:1;color:var(--ink);background:rgba(243,237,226,.94);cursor:pointer;box-shadow:2px 3px 0 rgba(70,45,20,.16);clip-path:polygon(2% 6%,98% 0,100% 48%,97% 100%,3% 94%,0 52%);transition:transform 160ms var(--ease-out)}
+.tabwrap:nth-child(odd) .tab{rotate:-1.5deg}.tabwrap:nth-child(even){margin-left:8px}.tabwrap:nth-child(even) .tab{rotate:1.2deg}
+.tab:active{transform:scale(.96)}
+@media (hover:hover) and (pointer:fine){.tab:hover{transform:translateX(3px)}}
+.tabwrap{position:relative;display:inline-block}
+.tabwrap::after{content:"";position:absolute;inset:-8px -12px -9px -10px;pointer-events:none;opacity:0;transform:scale(.9);transition:opacity 160ms var(--ease-out),transform 200ms var(--ease-out);
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 60' preserveAspectRatio='none'%3E%3Cpath d='M30 8C80 0 170 2 190 18c14 12-8 32-60 36-50 4-118 2-122-20C4 18 40 6 92 6' fill='none' stroke='%232E5438' stroke-width='3.2' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+.tabwrap:has([aria-pressed="true"])::after{opacity:1;transform:none}
+.timer{display:inline-flex;align-items:center;gap:8px;border:0;background:var(--ink);color:var(--paper);padding:6px 12px 6px 8px;border-radius:99px;cursor:pointer;font-size:13px;font-variant-numeric:tabular-nums;box-shadow:3px 4px 0 rgba(70,45,20,.22);rotate:-2deg;transition:transform 160ms var(--ease-out)}
 .timer:active{transform:scale(.97)}
+.timer:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .timer svg{flex:none;rotate:-90deg}
 .timer circle{fill:none;stroke-width:2.5}
-.timer .trk{stroke:var(--mist)}
-.timer .run{stroke:var(--moss);stroke-linecap:round;stroke-dasharray:47.12;transition:stroke-dashoffset 250ms linear}
-.timer.hold .run{stroke:var(--grey)}
+.timer .trk{stroke:rgba(242,237,228,.25)}
+.timer .run{stroke:var(--green-fill);stroke-linecap:round;stroke-dasharray:47.12;transition:stroke-dashoffset 250ms linear}
+.timer.hold .run{stroke:var(--mist)}
+.small{display:flex;flex-wrap:wrap;gap:4px 6px;font-family:var(--crayon);font-size:19px;line-height:1;padding-left:2px}
+.small button{border:0;background:none;padding:2px 0;cursor:pointer;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px;transition:transform 160ms var(--ease-out)}
+.small button:active{transform:scale(.96)}
+/* name tag, like the ones handed out at a gig */
+.tag{margin-top:auto;display:grid;width:142px;border:0;padding:0;background:var(--white);border-radius:8px;overflow:hidden;cursor:pointer;text-align:center;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08),var(--shadow);rotate:2deg;transition:transform 180ms var(--ease-out),box-shadow 180ms var(--ease-out)}
+.tag-top{background:var(--moss);color:var(--paper);font-family:var(--crayon);font-size:19px;line-height:1;padding:7px 6px 5px}
+.tag-top small{display:block;font-family:var(--body);font-size:9px;letter-spacing:.12em;text-transform:uppercase;opacity:.8;margin-top:2px}
+.tag-name{font-family:var(--crayon);font-size:22px;line-height:1;padding:12px 8px 13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag:not(.in) .tag-name{color:var(--grey);font-size:19px}
+@media (hover:hover) and (pointer:fine){.tag:hover{transform:translateY(-3px)}}
+.tag:active{transform:scale(.97)}
+.stage{position:relative;flex:1;min-width:0}
+.wins{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+.wins>*{pointer-events:auto}
+.av{flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--mist);font-family:var(--crayon);font-weight:400;font-size:16px;line-height:1}
+.chip{border:1.5px solid var(--ink);background:var(--white);border-radius:var(--doodle);padding:3px 11px 4px;font-size:13px;font-weight:500;cursor:pointer;transition:transform 160ms var(--ease-out),background-color 150ms ease,color 150ms ease}
+.chip:active{transform:scale(.97)}
+.chip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+@media (hover:hover) and (pointer:fine){.chip:not([aria-pressed="true"]):hover{background:var(--moss-fill)}}
 .pop{position:fixed;z-index:100001;background:var(--white);border:2px solid var(--ink);border-radius:var(--r);box-shadow:var(--shadow);padding:6px;display:grid;gap:2px;min-width:170px;transform-origin:top left;transition:opacity 150ms var(--ease-out),transform 150ms var(--ease-out)}
 .pop.closed{opacity:0;transform:scale(.96);pointer-events:none}
 .pop button{display:flex;justify-content:space-between;gap:16px;border:0;background:none;text-align:left;padding:6px 9px;border-radius:6px;cursor:pointer;font-size:14px}
@@ -70,7 +99,7 @@ a{color:var(--moss)}
 .pop button:disabled{opacity:.4;cursor:default}
 @media (hover:hover) and (pointer:fine){.pop button:not(:disabled):hover{background:var(--moss-fill)}}
 
-.desk{position:relative;z-index:1;flex:1;min-height:0;overflow:hidden;touch-action:none}
+.desk{position:absolute;inset:0;z-index:1;overflow:hidden;touch-action:none}
 .item{position:absolute;left:0;top:0;will-change:transform;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none}
 .item.lifted{cursor:grabbing}
 .item:focus-visible{outline:2px dashed var(--ink);outline-offset:4px}
@@ -91,7 +120,7 @@ body.dragging iframe{pointer-events:none}
 .ph small{font-size:11px;color:var(--grey);line-height:1.3}
 .cap{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:10px 2px 16px}
 .who{min-width:0;line-height:1.2;cursor:pointer}
-.who b{display:block;font-family:var(--crayon);font-weight:400;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who b{display:block;font-weight:700;font-size:14px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .who span{color:var(--fr-sub);font-size:12px}
 .vote{flex:none;border:1.5px solid var(--ink);background:var(--white);border-radius:var(--doodle);padding:3px 10px;font-size:13px;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums;transition:transform 160ms var(--ease-out),background-color 150ms ease}
 .vote:active{transform:scale(.97)}
@@ -170,6 +199,7 @@ body.dragging iframe{pointer-events:none}
 .big iframe{display:block;border:0}
 .big .ph{position:relative;min-height:220px}
 .head{display:flex;gap:12px;align-items:center}
+.head h2{font-family:var(--body);font-weight:700;font-size:21px;line-height:1.15;letter-spacing:-.01em}
 .head .av{width:54px;height:54px;font-size:30px}
 .head .av.me{background:var(--moss);color:var(--paper)}
 .bio{margin:0;font-size:14px;line-height:1.4}
@@ -195,33 +225,41 @@ pre{margin:0;background:var(--paper);border:1.5px dashed var(--line);border-radi
 details summary{font-size:12px;color:var(--grey);cursor:pointer}
 .toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));translate:-50% 0;background:var(--ink);color:var(--paper);padding:8px 16px 9px;border-radius:var(--doodle);font-family:var(--crayon);font-size:20px;z-index:100002;transition:opacity 200ms var(--ease-out),transform 200ms var(--ease-out)}
 .toast[hidden]{display:block!important;opacity:0;transform:translateY(8px);pointer-events:none}
-@media (max-width:560px){.bar,.feedbar{padding-inline:12px}.brand{font-size:22px}.brand img{width:28px;height:28px}.mi{padding:5px 7px;font-size:14px}.count{display:none}.brand span,.long,.lbl{display:none}.brand{margin-right:4px}.timer{order:-1;margin:0 4px 0 0;padding-left:0}}
+@media (max-width:560px){
+  body{flex-direction:column}
+  .side{width:auto;flex-direction:row;align-items:center;gap:12px;padding:14px 12px 10px;padding-top:calc(14px + env(safe-area-inset-top,0px));overflow-x:auto;overflow-y:hidden}
+  .brand img{width:46px;height:46px}.brand .count,.lbl,.memo span{display:none}
+  .memo{flex:none;width:auto;padding:10px 11px 9px}.memo b{font-size:20px;white-space:nowrap}.memo.l{margin-left:0}
+  .tabs-side{flex-direction:row;gap:12px}.tab{white-space:nowrap;font-size:18px}.tabwrap:nth-child(even){margin-left:0}
+  .timer{flex:none}.small{display:none}
+  .side>*{order:2}.brand{order:0}.tag{order:1}
+  .tag{flex:none;margin-top:0;width:auto;min-width:96px}.tag-top{font-size:15px;padding:5px 8px 3px}.tag-top small{display:none}.tag-name{font-size:17px;padding:6px 10px 7px}
+}
 @media (prefers-reduced-motion:reduce){.toast{transition:opacity 200ms ease}.toast[hidden]{transform:none}.pop{transition:opacity 150ms ease}.pop.closed{transform:none}}
 </style>
 </head>
 <body>
 <canvas id="table" aria-hidden="true"></canvas>
-<div class="top">
-  <div class="bar" role="menubar" aria-label="Menu">
-    <span class="brand"><img src="img/kvsh-studio-pin.png" alt="KVSH Studio"><span>kvsh studio</span></span>
-    <button class="mi" role="menuitem" id="m-post">postar</button>
-    <button class="mi" role="menuitem" id="m-rank">ranking</button>
-    <button class="mi" role="menuitem" id="m-cover">cover<span class="long"> da semana</span></button>
-    <span class="right"><span class="count" id="count"></span><button class="me" id="m-me"><span class="av" id="me-av">+</span><span id="me-t">criar perfil</span></button></span>
+<canvas id="things" aria-hidden="true"></canvas>
+<nav class="side" aria-label="Menu">
+  <div class="brand"><img src="img/kvsh-studio-pin.png" alt="KVSH Studio"><span class="count" id="count"></span></div>
+  <button class="memo y" id="m-post"><b>postar</b><span>cola teu vídeo</span></button>
+  <button class="memo l" id="m-rank"><b>ranking</b><span>por instrumento</span></button>
+  <button class="memo g" id="m-cover"><b>cover da semana</b><span>cante por nós</span></button>
+  <span class="lbl">na mesa:</span>
+  <div class="tabs-side" role="toolbar" aria-label="O que aparece na mesa">
+    <span class="tabwrap"><button class="tab" data-mode="sugerido" aria-pressed="true">sugerido</button></span>
+    <span class="tabwrap"><button class="tab" data-mode="novos" aria-pressed="false">novos</button></span>
+    <span class="tabwrap"><button class="tab" data-mode="top" aria-pressed="false">top</button></span>
+    <span class="tabwrap"><button class="tab" data-mode="alta" aria-pressed="false">em alta</button></span>
+    <span class="tabwrap"><button class="tab" id="c-inst" aria-pressed="false" aria-haspopup="true" aria-expanded="false">instrumento ▾</button></span>
   </div>
-  <div class="feedbar" role="toolbar" aria-label="O que aparece na mesa">
-    <span class="lbl">na mesa:</span>
-    <button class="chip" data-mode="sugerido" aria-pressed="true">sugerido</button>
-    <button class="chip" data-mode="novos" aria-pressed="false">novos</button>
-    <button class="chip" data-mode="top" aria-pressed="false">top</button>
-    <button class="chip" data-mode="alta" aria-pressed="false">em alta</button>
-    <button class="chip" id="c-inst" aria-pressed="false" aria-haspopup="true" aria-expanded="false">instrumento ▾</button>
-    <button class="timer" id="timer"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle class="trk" cx="10" cy="10" r="7.5"/><circle class="run" id="ring" cx="10" cy="10" r="7.5"/></svg><span id="timer-t"></span></button>
-    <span class="right"><button class="mi" id="m-tidy">arrumar</button><button class="mi" id="m-mess">bagunçar</button></span>
-  </div>
-</div>
+  <button class="timer" id="timer"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle class="trk" cx="10" cy="10" r="7.5"/><circle class="run" id="ring" cx="10" cy="10" r="7.5"/></svg><span id="timer-t"></span></button>
+  <div class="small"><button id="m-tidy">arrumar</button><span aria-hidden="true">·</span><button id="m-mess">bagunçar</button></div>
+  <button class="tag" id="m-me"><span class="tag-top">oi, eu sou<small>kvsh studio</small></span><span class="tag-name" id="me-t">criar perfil</span></button>
+</nav>
 <div class="pop closed" id="pop" role="menu" aria-label="Instrumentos"></div>
-<div class="desk" id="desk"></div>
+<main class="stage" id="stage"><div class="desk" id="desk"></div><div class="wins" id="wins"></div></main>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -336,12 +374,13 @@ const PLAYER = {
 const CLIP_SVG = `<svg width="18" height="22" viewBox="0 0 18 22" aria-hidden="true"><path d="M7.6 2.2C4.2 2.2 2.4 4.6 2.4 8v6.4c0 3.4 2 5.6 5.2 5.6s5.3-2 5.9-5.2L15.4 6c.5-2.3-.9-3.8-3-3.8Z"/><path d="M11.8 6.4 10.3 15"/></svg>`;
 const PLAY_SVG = `<svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M1 1.2v9.6L9.2 6Z"/></svg>`;
 
-const desk = document.getElementById("desk");
+const desk = document.getElementById("desk"), stage = document.getElementById("stage"), wins = document.getElementById("wins");
 let z = 10;
 const items = new Map();
 
 function place(el, x, y, r, { drop = false } = {}) {
-  if (el.parentNode !== desk) desk.appendChild(el);
+  const home = el.classList.contains("win") ? wins : desk;
+  if (el.parentNode !== home) home.appendChild(el);
   const it = { el, x, y, r, s: 1 };
   const apply = () => { el.style.transform = `translate3d(${it.x}px,${it.y}px,0) rotate(${it.r}deg) scale(${it.s})`; };
   it.mx = Motion.value(x, v => { it.x = v; apply(); });
@@ -711,7 +750,7 @@ function mess() {
 
 /* ---------- drag: the item keeps its tilt while held (no spinning), springs carry the throw on release ---------- */
 let drag = null;
-desk.addEventListener("pointerdown", e => {
+stage.addEventListener("pointerdown", e => {
   if (e.pointerType !== "mouse") feed.holdUntil = Date.now() + 8000;
   const el = e.target.closest(".item");
   if (!el || e.button > 0) return;
@@ -723,7 +762,7 @@ desk.addEventListener("pointerdown", e => {
   it.ms.to(1.03, { response: .25 });
   drag = { el, it, id: e.pointerId, target: e.target, ox: e.clientX - it.mx.get(), oy: e.clientY - it.my.get(), sx: e.clientX, sy: e.clientY, moved: false, tx: Motion.tracker(), ty: Motion.tracker() };
 });
-desk.addEventListener("pointermove", e => {
+stage.addEventListener("pointermove", e => {
   if (!drag || e.pointerId !== drag.id) return;
   if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 4) drag.moved = true;
   const x = e.clientX - drag.ox, y = e.clientY - drag.oy;
@@ -745,10 +784,10 @@ function release(e) {
   it.mx.to(clamp(it.x + Motion.project(vx, .99), b.minX, b.maxX), { velocity: vx, damping: .8, response: .4 });
   it.my.to(clamp(it.y + Motion.project(vy, .99), b.minY, b.maxY), { velocity: vy, damping: .8, response: .4 });
 }
-desk.addEventListener("pointerup", release);
-desk.addEventListener("pointercancel", release);
+stage.addEventListener("pointerup", release);
+stage.addEventListener("pointercancel", release);
 
-desk.addEventListener("keydown", e => {
+stage.addEventListener("keydown", e => {
   const el = e.target.closest(".item"); if (!el || e.target !== el) return;
   const it = items.get(el), step = e.shiftKey ? 40 : 12;
   const mv = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
@@ -769,7 +808,9 @@ function openPop() {
   const counts = Object.fromEntries(INSTR.map(i => [i, posts().filter(p => p.inst === i).length]));
   pop.innerHTML = INSTR.map(i => `<button role="menuitem" data-inst="${i}"${counts[i] ? "" : " disabled"}>${i}<span>${counts[i]}</span></button>`).join("");
   const r = cInst.getBoundingClientRect();
-  pop.style.left = clamp(r.left, 8, innerWidth - 190) + "px"; pop.style.top = r.bottom + 6 + "px";
+  const side = innerWidth >= 560;
+  pop.style.left = clamp(side ? r.right + 12 : r.left, 8, innerWidth - 190) + "px";
+  pop.style.top = clamp(side ? r.top - 6 : r.bottom + 6, 8, innerHeight - 380) + "px";
   pop.classList.remove("closed"); cInst.setAttribute("aria-expanded", "true");
   pop.querySelector("button:not(:disabled)")?.focus({ preventScroll: true });
 }
@@ -887,7 +928,6 @@ document.addEventListener("submit", e => {
 });
 function refreshMe() {
   document.getElementById("m-me").classList.toggle("in", !!me);
-  document.getElementById("me-av").textContent = me ? initial(me.name) : "+";
   document.getElementById("me-t").textContent = me ? me.h : "criar perfil";
 }
 
@@ -906,38 +946,46 @@ refreshMe(); build();
 <script type="module">
 // The table: light wood, lit from the upper left, with the brand's objects lying on it.
 // Rendered only when something changes (resize, pointer parallax), never in a loop.
-const canvas = document.getElementById("table"), desk = document.getElementById("desk");
+const canvas = document.getElementById("table"), things = document.getElementById("things"), desk = document.getElementById("desk"), stage = document.getElementById("stage");
 const SRC = { three: "./lib/three.module.min.js", pin: "img/kvsh-studio-face.jpg", logo: "img/kvsh-logo.png" };
 let THREE = null;
 try { THREE = await import(SRC.three); } catch (e) { console.warn("three.js não carregou, fica o fundo de madeira em CSS", e); }
 // Let the cards land first; building the table takes a moment on slow phones.
 await new Promise(r => setTimeout(r, 450));
-if (THREE) { try { await setup(); } catch (e) { console.warn(e); canvas.remove(); } } else canvas.remove();
+if (THREE) { try { await setup(); } catch (e) { console.warn(e); canvas.remove(); things.remove(); } } else { canvas.remove(); things.remove(); }
 
+// Two layers share one camera: the table (under the polaroids) and the things on it (over them).
+// The things cast their shadows onto a see-through plane, so the shadows fall on the wood and on the cards alike.
 async function setup() {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "low-power" });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = false;
-  renderer.toneMapping = THREE.NeutralToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
-  const scene = new THREE.Scene();
+  const mk = (cv, alpha) => {
+    const r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha, powerPreference: "low-power" });
+    r.setPixelRatio(Math.min(devicePixelRatio, 2)); r.toneMapping = THREE.NeutralToneMapping; r.outputColorSpace = THREE.SRGBColorSpace;
+    return r;
+  };
+  const under = mk(canvas, false), over = mk(things, true), renderer = over;
+  over.setClearColor(0x000000, 0);
+  over.shadowMap.enabled = true; over.shadowMap.type = THREE.PCFShadowMap; over.shadowMap.autoUpdate = false;
+  const ground = new THREE.Scene(), scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(30, 1, 1, 200);
   const BASE = new THREE.Vector3(0, 34, 5);
   camera.position.copy(BASE); camera.lookAt(0, 0, 0);
-
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(room(), 0.04).texture;
-  scene.environmentIntensity = .55;
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xcbb38c, .55));
+  const env = r => new THREE.PMREMGenerator(r).fromScene(room(), 0.04).texture;
+  ground.environment = env(under); scene.environment = env(over);
+  ground.environmentIntensity = scene.environmentIntensity = .55;
   const sun = new THREE.DirectionalLight(0xfff1de, 2.3);
   sun.position.set(-11, 24, -13); sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -.0005; sun.shadow.normalBias = .02;
-  scene.add(sun, sun.target);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xcbb38c, .55), sun, sun.target);
+  const sun2 = new THREE.DirectionalLight(0xfff1de, 2.3); sun2.position.copy(sun.position);
+  ground.add(new THREE.HemisphereLight(0xffffff, 0xcbb38c, .55), sun2, sun2.target);
+  const catcher = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.ShadowMaterial({ color: 0x3a2410, opacity: .34 }));
+  catcher.rotation.x = -Math.PI / 2; catcher.receiveShadow = true; scene.add(catcher);
 
   const anis = renderer.capabilities.getMaxAnisotropy();
   const wood = new THREE.CanvasTexture(woodTile(1536));
   wood.colorSpace = THREE.SRGBColorSpace; wood.wrapS = wood.wrapT = THREE.RepeatWrapping; wood.anisotropy = anis;
   const table = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshStandardMaterial({ map: wood, roughness: .78 }));
-  table.rotation.x = -Math.PI / 2; table.receiveShadow = true; scene.add(table);
+  table.rotation.x = -Math.PI / 2; ground.add(table);
 
   const M = {
     green: new THREE.MeshStandardMaterial({ color: 0x2E5438, metalness: .75, roughness: .3 }),
@@ -972,7 +1020,7 @@ async function setup() {
     g.lineWidth = 6; g.lineCap = "round"; g.lineJoin = "round";
     ink(g, () => { g.beginPath(); g.moveTo(30, 230); g.bezierCurveTo(160, 210, 300, 140, 470, 70); g.stroke(); g.beginPath(); g.moveTo(420, 52); g.lineTo(480, 66); g.lineTo(452, 122); g.stroke(); });
   });
-  scene.add(words, ring, scribble);
+  ground.add(words, ring, scribble);
 
   const ray = new THREE.Raycaster(), floor = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), v = new THREE.Vector3();
   let wpp = .02;
@@ -985,12 +1033,12 @@ async function setup() {
   }
   function layout() {
     const w = innerWidth, h = innerHeight, narrow = w < 560;
-    renderer.setSize(w, h, false);
+    under.setSize(w, h, false); over.setSize(w, h, false);
     camera.aspect = w / h; camera.position.copy(BASE); camera.lookAt(0, 0, 0); camera.updateProjectionMatrix();
     const visH = 2 * BASE.length() * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), visW = visH * w / h;
     wpp = visH / h;
     const S = Math.max(visW, visH) * 1.8;
-    table.scale.set(S, S, 1);
+    table.scale.set(S, S, 1); catcher.scale.set(S, S, 1);
     const tile = 1100 * wpp; wood.repeat.set(S / tile, S / tile);
     sun.shadow.camera.left = -visW * .7; sun.shadow.camera.right = visW * .7; sun.shadow.camera.top = visH * .8; sun.shadow.camera.bottom = -visH * .8;
     sun.shadow.camera.near = 1; sun.shadow.camera.far = 80; sun.shadow.camera.updateProjectionMatrix();
@@ -1005,10 +1053,10 @@ async function setup() {
     put(scribble, .2, .66, 140 * k, 1, 0);
     [words, ring, scribble].forEach(d => { d.scale.set(d.scale.x, d.scale.x * d.userData.aspect, 1); d.position.y = .004; d.rotation.set(-Math.PI / 2, 0, 0); });
     renderer.shadowMap.needsUpdate = true;
-    render();
+    render(true);
   }
-  let queued = false;
-  function render() { if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; renderer.render(scene, camera); }); }
+  let queued = false, base = true;
+  function render(all) { base ||= !!all; if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; if (base) under.render(ground, camera); base = false; over.render(scene, camera); }); }
   addEventListener("resize", layout);
   layout();
 
@@ -1028,36 +1076,36 @@ async function setup() {
     y: Motion.value(o.position.y, y => { o.position.y = y; moved(); }),
   };
   let held = null, hoverQ = false;
-  desk.addEventListener("pointerdown", e => {
-    if (e.target !== desk || e.button > 0) return;
+  stage.addEventListener("pointerdown", e => {
+    if (e.button > 0 || e.target.closest(".win")) return;
     const o = hit(e); if (!o) return;
-    e.preventDefault();
+    e.preventDefault(); e.stopPropagation();
     const p = onTable(e.clientX, e.clientY), m = motion(o);
     held = { o, m, id: e.pointerId, dx: o.position.x - p.x, dz: o.position.z - p.z, tx: Motion.tracker(), tz: Motion.tracker() };
-    desk.setPointerCapture(e.pointerId); desk.style.cursor = "grabbing";
+    stage.setPointerCapture(e.pointerId); document.body.classList.add("hold3d");
     m.y.to(.45, { response: .25 });
-  });
-  desk.addEventListener("pointermove", e => {
+  }, true);
+  stage.addEventListener("pointermove", e => {
     if (held && e.pointerId === held.id) {
       const p = onTable(e.clientX, e.clientY), x = p.x + held.dx, z = p.z + held.dz;
       held.m.x.set(x); held.m.z.set(z); held.tx.add(x); held.tz.add(z);
       return;
     }
-    if (e.pointerType !== "mouse" || hoverQ) return;
+    if (e.pointerType !== "mouse" || hoverQ || document.body.classList.contains("dragging")) return;
     hoverQ = true;
-    requestAnimationFrame(() => { hoverQ = false; desk.style.cursor = e.target === desk && hit(e) ? "grab" : ""; });
+    requestAnimationFrame(() => { hoverQ = false; document.body.classList.toggle("grab3d", !e.target.closest(".win") && !!hit(e)); });
   });
   const drop = e => {
     if (!held || e.pointerId !== held.id) return;
-    const { o, m, tx, tz } = held; held = null; desk.style.cursor = "grab";
+    const { o, m, tx, tz } = held; held = null; document.body.classList.remove("hold3d");
     const r = desk.getBoundingClientRect(), a = onTable(r.left + 20, r.top + 20), b = onTable(r.right - 20, r.bottom - 20);
     const vx = tx.velocity(), vz = tz.velocity();
     m.x.to(Math.min(b.x, Math.max(a.x, o.position.x + Motion.project(vx, .99))), { velocity: vx, damping: .8, response: .4 });
     m.z.to(Math.min(b.z, Math.max(a.z, o.position.z + Motion.project(vz, .99))), { velocity: vz, damping: .8, response: .4 });
     m.y.to(0, { damping: .55, response: .35 });
   };
-  desk.addEventListener("pointerup", drop);
-  desk.addEventListener("pointercancel", drop);
+  stage.addEventListener("pointerup", drop);
+  stage.addEventListener("pointercancel", drop);
 
   /* --- builders --- */
   function room() {
