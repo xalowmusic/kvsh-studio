@@ -329,7 +329,8 @@ function seals(p) {
 
 // Native player sizes. Instagram's embed includes its header and footer; TikTok's player is just the video.
 const PLAYER = {
-  instagram: { w: 326, h: 580, src: p => `https://www.instagram.com/reel/${p.vid}/embed/` },
+  // crop: where the video sits inside Instagram's embed (below its header, above its footer), measured from a live embed.
+  instagram: { w: 326, h: 580, crop: { top: 62, h: 400 }, src: p => `https://www.instagram.com/reel/${p.vid}/embed/` },
   tiktok: { w: 324, h: 576, src: p => `https://www.tiktok.com/player/v1/${p.vid}?description=0&music_info=0&rel=0` },
 };
 const CLIP_SVG = `<svg width="18" height="22" viewBox="0 0 18 22" aria-hidden="true"><path d="M7.6 2.2C4.2 2.2 2.4 4.6 2.4 8v6.4c0 3.4 2 5.6 5.2 5.6s5.3-2 5.9-5.2L15.4 6c.5-2.3-.9-3.8-3-3.8Z"/><path d="M11.8 6.4 10.3 15"/></svg>`;
@@ -368,15 +369,21 @@ function placeholder(p) {
 }
 // Fits a native-size player into a box by scaling it, so the real controls still work.
 function playerInto(box, p, width) {
-  const P = PLAYER[p.net], k = width / P.w;
-  box.style.setProperty("--ar", P.h / P.w);
+  const P = PLAYER[p.net];
+  box.style.setProperty("--ar", 16 / 9);
   if (SANDBOX) { box.innerHTML = placeholder(p); return; }
   const f = document.createElement("iframe");
   f.src = P.src(p); f.width = P.w; f.height = P.h; f.loading = "lazy";
   f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen"; f.allowFullscreen = true;
   f.title = `${netName(p)} de ${p.h}`;
-  f.style.transform = `scale(${k})`;
+  fit(f, P, width, width * 16 / 9);
   box.appendChild(f);
+}
+// Scales a player into a 9:16 box. Instagram is zoomed so only the Reel shows, edge to edge like TikTok.
+function fit(f, P, W, H) {
+  if (!P.crop) { f.style.transform = `scale(${W / P.w})`; return; }
+  const k = Math.max(H / P.crop.h, W / P.w) * 1.04;
+  f.style.transform = `translate(${(W - P.w * k) / 2}px,${-P.crop.top * k - (P.crop.h * k - H) / 2}px) scale(${k})`;
 }
 
 // Each post keeps its frame color (picked from its id), so it looks the same every time it comes back.
@@ -650,9 +657,10 @@ function openVideo(p, from) {
   const big = el.querySelector(".big");
   if (SANDBOX) big.innerHTML = placeholder(p);
   else {
-    const P = PLAYER[p.net], k = Math.min(1, inner / P.w), h = Math.min(P.h * k, desk.clientHeight - 150);
+    const P = PLAYER[p.net], h = Math.min(inner * 16 / 9, desk.clientHeight - 150), w = P.crop ? inner : Math.min(inner, h * 9 / 16);
     big.style.height = h + "px";
-    big.innerHTML = `<iframe src="${P.src(p)}" width="${P.w}" height="${P.h}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen style="transform:scale(${k});transform-origin:0 0;width:${P.w}px;height:${P.h}px" title="${netName(p)} de ${esc(p.h)}"></iframe>`;
+    big.innerHTML = `<iframe src="${P.src(p)}" width="${P.w}" height="${P.h}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen style="position:absolute;left:${(inner - w) / 2}px;top:0;transform-origin:0 0;width:${P.w}px;height:${P.h}px" title="${netName(p)} de ${esc(p.h)}"></iframe>`;
+    fit(big.firstChild, P, w, P.crop ? h : w * P.h / P.w);
   }
   if (fresh) place(el, clamp((from?.x ?? desk.clientWidth / 2) + 30, 8, desk.clientWidth - W - 8), 8, rand(-1, 1), { drop: true });
 }
@@ -826,7 +834,8 @@ function parseLink(raw) {
   let u; try { u = new URL(raw.trim()); } catch (e) { return { error: "isso não parece um link. copia pelo botão compartilhar do app." }; }
   const h = u.hostname.replace(/^www\.|^m\./, "");
   if (h === "instagram.com") {
-    const m = u.pathname.match(/^\/(?:[^/]+\/)?(reel|reels|p|tv)\/([A-Za-z0-9_-]+)/);
+    const m = u.pathname.match(/^\/(?:[^/]+\/)?(reel|reels)\/([A-Za-z0-9_-]+)/);
+    if (!m && /^\/(?:[^/]+\/)?(p|tv)\//.test(u.pathname)) return { error: "do instagram só entra reels. esse link é de post." };
     return m ? { net: "instagram", vid: m[2], url: `https://www.instagram.com/reel/${m[2]}/` } : { error: "esse é o link do perfil. precisa ser o link do reels." };
   }
   if (h === "tiktok.com") {
