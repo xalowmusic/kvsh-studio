@@ -12,6 +12,7 @@
 :root{
   --paper:#F2EDE4; --white:#FBF8F2; --ink:#0A0A08; --grey:#5E5A56; --mist:#D0CAC0; --forest:#1A3020; --moss:#2E5438; --moss-fill:#d5dfd0;
   --line:rgba(10,10,8,.14);
+  --yellow:#e0b23e; --lilac:#9c8fc9; --coral:#e07a5f; --blue:#3f6fa3; --green-fill:#c8e6c0;
   --crayon:"KidType Crayon","Gochi Hand","Comic Sans MS",cursive;
   --body:"Space Grotesk","Segoe UI",system-ui,sans-serif;
   --ease-out:cubic-bezier(0.23,1,0.32,1);
@@ -112,16 +113,18 @@ body.dragging iframe{pointer-events:none}
 
 /* seals, stuck to the card: they move and tilt with it */
 .seal{position:absolute;z-index:3;display:grid;place-items:center;align-content:center;text-align:center;font-family:var(--crayon);line-height:.9;border:3px solid #fff;box-shadow:2px 3px 0 rgba(70,45,20,.22);pointer-events:none}
-.s-top{width:62px;height:62px;border-radius:50%;background:var(--ink);color:var(--paper);font-size:16px;left:-17px;top:20%;rotate:-9deg}
+.s-top{width:62px;height:62px;border-radius:50%;background:var(--yellow);color:var(--ink);font-size:16px;left:-17px;top:20%;rotate:-9deg}
 .s-top b{display:block;font-weight:400;font-size:28px}
-.s-hot{width:60px;height:60px;border-radius:50%;background:var(--paper);color:var(--ink);font-size:17px;right:-16px;top:44%;rotate:8deg;box-shadow:inset 0 0 0 1.5px var(--ink),2px 3px 0 rgba(70,45,20,.22)}
-.s-new{padding:4px 13px 6px;border-radius:99px;background:var(--moss);color:var(--paper);font-size:20px;left:-13px;bottom:74px;rotate:-6deg}
+.s-hot{padding:5px 12px 7px;border-radius:99px;background:var(--coral);color:var(--ink);font-size:18px;white-space:nowrap;left:-18px;top:47%;rotate:-7deg}
+.s-new{width:58px;height:58px;border-radius:50%;background:var(--lilac);color:var(--ink);font-size:18px;left:-14px;bottom:78px;rotate:-10deg}
 
 /* loose stickers and notes */
 .loose .stk{display:grid;place-items:center;text-align:center;font-family:var(--crayon);line-height:.95;border:3px solid #fff;box-shadow:3px 4px 0 rgba(70,45,20,.22)}
 .loose.lifted .stk{box-shadow:10px 14px 0 rgba(70,45,20,.15)}
 .stk.round{width:70px;height:70px;border-radius:50%;font-size:17px}
 .stk.pill{padding:5px 13px 7px;border-radius:99px;font-size:19px;white-space:nowrap}
+.stk.drop{width:62px;height:62px;border-radius:50% 50% 50% 8%;rotate:-45deg}
+.stk.drop span{rotate:45deg;font-size:18px}
 .note{width:178px;padding:13px 15px 16px;background:var(--mist);box-shadow:var(--shadow);border-radius:2px;font-size:13px;line-height:1.35;transition:box-shadow 180ms var(--ease-out)}
 .note.lifted{box-shadow:var(--shadow-lift)}
 .note b{display:block;font-family:var(--crayon);font-weight:400;font-size:24px;line-height:.95;margin:2px 0 6px}
@@ -319,7 +322,7 @@ function rankUp() {
 function seals(p) {
   const out = [], r = topRank.get(p.id);
   if (r) out.push(`<span class="seal s-top">top<b>${r}</b></span>`);
-  if (hotSet.has(p.id)) out.push(`<span class="seal s-hot">em<br>alta</span>`);
+  if (hotSet.has(p.id)) out.push(`<span class="seal s-hot">em alta</span>`);
   if (isNew(p)) out.push(`<span class="seal s-new">novo</span>`);
   return out.slice(0, 2).join("");
 }
@@ -669,8 +672,16 @@ function build() {
   const cv = note(`<span class="sm">cover da semana ${COVER.week}</span><b>${COVER.song}</b><span class="sm">${COVER.bpm} bpm · ${COVER.key} · vota até domingo</span>`);
   cv.dataset.click = "cover"; cv.setAttribute("aria-label", "Cover da semana. Enter abre");
   add(cv, narrow ? 6 : W * .64, H - (narrow ? 118 : 150), rand(-5, 3));
-  add(sticker(`<span class="stk round" style="background:var(--moss);color:var(--paper)">banda<br>aberta</span>`), narrow ? W - 84 : W * .05, H - (narrow ? 250 : 190), rand(-14, 14));
-  if (!narrow) add(sticker(`<span class="stk pill" style="background:var(--paper);box-shadow:inset 0 0 0 1.5px var(--ink),3px 4px 0 rgba(70,45,20,.22)">here to make noise</span>`), W * .29, H - 48, rand(-8, 8));
+  // Loose stickers, thrown on the table. Drag them around like everything else.
+  const spots = narrow ? [[W - 84, H - 250], [W - 120, H - 330], [12, H - 210]] : [[W * .05, H - 190], [W * .29, H - 48], [W * .43, H - 215], [W * .78, H - 300], [W * .62, H - 34], [W * .02, H - 330]];
+  [
+    `<span class="stk round" style="background:var(--green-fill)">banda<br>aberta</span>`,
+    `<span class="stk pill" style="background:var(--yellow)">here to make noise</span>`,
+    `<span class="stk drop" style="background:var(--blue);color:#fff"><span>BR</span></span>`,
+    `<span class="stk round" style="background:var(--coral)">vem<br>tocar</span>`,
+    `<span class="stk pill" style="background:var(--lilac)">less ego, more noise</span>`,
+    `<span class="stk round" style="background:var(--ink);color:var(--paper);width:78px;height:78px;font-size:14px">make art<br>not<br>content</span>`,
+  ].slice(0, spots.length).forEach((h, j) => add(sticker(h), spots[j][0], spots[j][1], rand(-16, 16)));
   tick();
 }
 function tidy() {
@@ -887,7 +898,7 @@ refreshMe(); build();
 // The table: light wood, lit from the upper left, with the brand's objects lying on it.
 // Rendered only when something changes (resize, pointer parallax), never in a loop.
 const canvas = document.getElementById("table"), desk = document.getElementById("desk");
-const SRC = { three: "./lib/three.module.min.js", pin: "img/kvsh-studio-face.jpg" };
+const SRC = { three: "./lib/three.module.min.js", pin: "img/kvsh-studio-face.jpg", logo: "img/kvsh-logo.png" };
 let THREE = null;
 try { THREE = await import(SRC.three); } catch (e) { console.warn("three.js não carregou, fica o fundo de madeira em CSS", e); }
 // Let the cards land first; building the table takes a moment on slow phones.
@@ -930,8 +941,8 @@ async function setup() {
 
   const objs = {
     biner: shadowy(carabiner(M)),
-    black: shadowy(marker(M.black, M.black, M.white, true)),
-    white: shadowy(marker(M.white, M.black, M.black, false)),
+    black: shadowy(marker(M.black, M.black, logoBand("#EDE6DA"), true)),
+    white: shadowy(marker(M.white, M.black, logoBand("#EDE6DA"), false)),
     cap: shadowy(cap(M.black)),
     pin: shadowy(pinButton()),
   };
@@ -961,7 +972,7 @@ async function setup() {
   function put(o, fx, fy, px, size, turn) {
     const r = desk.getBoundingClientRect(), p = onTable(r.left + r.width * fx, r.top + r.height * fy);
     const s = px * wpp / size;
-    o.scale.setScalar(s); o.position.set(p.x, 0, p.z); o.rotation.y = turn;
+    o.scale.setScalar(s); o.position.set(p.x, 0, p.z); o.rotation.y = turn; o.userData.m = null;
   }
   function layout() {
     const w = innerWidth, h = innerHeight, narrow = w < 560;
@@ -992,13 +1003,52 @@ async function setup() {
   addEventListener("resize", layout);
   layout();
 
-  // Parallax: the table sits a little below the paper, so it slides slightly against the cards.
-  if (!matchMedia("(prefers-reduced-motion: reduce)").matches && matchMedia("(pointer:fine)").matches) {
-    const look = new THREE.Vector3();
-    const set = () => { camera.position.set(BASE.x + px.get(), BASE.y, BASE.z + py.get()); look.set(px.get() * .35, 0, py.get() * .35); camera.lookAt(look); render(); };
-    const px = Motion.value(0, set), py = Motion.value(0, set);
-    addEventListener("pointermove", e => { px.to((e.clientX / innerWidth - .5) * 1.4, { response: .9 }); py.to((e.clientY / innerHeight - .5) * 1.1, { response: .9 }); });
+  // The table never moves. What's on it can be picked up and dropped somewhere else.
+  const grabbable = [objs.biner, objs.black, objs.white, objs.cap, objs.pin];
+  const ndc = e => ({ x: e.clientX / innerWidth * 2 - 1, y: -(e.clientY / innerHeight) * 2 + 1 });
+  function hit(e) {
+    ray.setFromCamera(ndc(e), camera);
+    let o = ray.intersectObjects(grabbable, true)[0]?.object;
+    while (o && !grabbable.includes(o)) o = o.parent;
+    return o || null;
   }
+  const moved = () => { renderer.shadowMap.needsUpdate = true; render(); };
+  const motion = o => o.userData.m ||= {
+    x: Motion.value(o.position.x, x => { o.position.x = x; moved(); }),
+    z: Motion.value(o.position.z, z => { o.position.z = z; moved(); }),
+    y: Motion.value(o.position.y, y => { o.position.y = y; moved(); }),
+  };
+  let held = null, hoverQ = false;
+  desk.addEventListener("pointerdown", e => {
+    if (e.target !== desk || e.button > 0) return;
+    const o = hit(e); if (!o) return;
+    e.preventDefault();
+    const p = onTable(e.clientX, e.clientY), m = motion(o);
+    held = { o, m, id: e.pointerId, dx: o.position.x - p.x, dz: o.position.z - p.z, tx: Motion.tracker(), tz: Motion.tracker() };
+    desk.setPointerCapture(e.pointerId); desk.style.cursor = "grabbing";
+    m.y.to(.45, { response: .25 });
+  });
+  desk.addEventListener("pointermove", e => {
+    if (held && e.pointerId === held.id) {
+      const p = onTable(e.clientX, e.clientY), x = p.x + held.dx, z = p.z + held.dz;
+      held.m.x.set(x); held.m.z.set(z); held.tx.add(x); held.tz.add(z);
+      return;
+    }
+    if (e.pointerType !== "mouse" || hoverQ) return;
+    hoverQ = true;
+    requestAnimationFrame(() => { hoverQ = false; desk.style.cursor = e.target === desk && hit(e) ? "grab" : ""; });
+  });
+  const drop = e => {
+    if (!held || e.pointerId !== held.id) return;
+    const { o, m, tx, tz } = held; held = null; desk.style.cursor = "grab";
+    const r = desk.getBoundingClientRect(), a = onTable(r.left + 20, r.top + 20), b = onTable(r.right - 20, r.bottom - 20);
+    const vx = tx.velocity(), vz = tz.velocity();
+    m.x.to(Math.min(b.x, Math.max(a.x, o.position.x + Motion.project(vx, .99))), { velocity: vx, damping: .8, response: .4 });
+    m.z.to(Math.min(b.z, Math.max(a.z, o.position.z + Motion.project(vz, .99))), { velocity: vz, damping: .8, response: .4 });
+    m.y.to(0, { damping: .55, response: .35 });
+  };
+  desk.addEventListener("pointerup", drop);
+  desk.addEventListener("pointercancel", drop);
 
   /* --- builders --- */
   function room() {
@@ -1035,13 +1085,28 @@ async function setup() {
     const g = new THREE.Group(), r = .36, len = 3.2;
     const cyl = (r1, r2, l, mat, x) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r1, r2, l, 32), mat); m.rotation.z = Math.PI / 2; m.position.x = x; g.add(m); return m; };
     cyl(r, r, len, body, 0);
-    cyl(r + .006, r + .006, .9, band, -.5);
+    cyl(r + .006, r + .006, 1.5, band, -.4);
     cyl(r * .92, r * .92, .16, capMat, -len / 2 - .08);
     cyl(.2, r, .3, body, len / 2 + .15);
     const tip = new THREE.Mesh(new THREE.BoxGeometry(.34, .16, .26), M.felt); tip.position.x = len / 2 + .45; tip.rotation.x = .4; g.add(tip);
     if (capped) { const c = cap(capMat); c.position.set(len / 2 + .05, 0, 0); c.rotation.y = 0; c.children[0].position.y = 0; g.add(c); }
     g.children.forEach(m => m.position.y += capped ? r + .06 : r);
     return g;
+  }
+  // The KVSH wordmark printed on the barrel, reading along the marker, never stretched.
+  function logoBand(bg) {
+    const c = document.createElement("canvas"); c.width = 1024; c.height = 512;
+    const g = c.getContext("2d"); g.fillStyle = bg; g.fillRect(0, 0, c.width, c.height);
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = anis;
+    const img = new Image();
+    img.onload = () => {
+      // band: 1.5 long (canvas height), 2.3 around (canvas width). Logo 1.3 long, centered on the side facing up.
+      const len = 1.3 * 512 / 1.5, hgt = len * img.height / img.width * (1024 / 2.3) / (512 / 1.5);
+      g.save(); g.translate(256, 256); g.rotate(Math.PI / 2); g.drawImage(img, -len / 2, -hgt / 2, len, hgt); g.restore();
+      t.needsUpdate = true; render();
+    };
+    img.src = SRC.logo;
+    return new THREE.MeshStandardMaterial({ map: t, roughness: .5 });
   }
   function cap(mat) {
     const g = new THREE.Group(), c = new THREE.Group(), r = .42, l = 1.15;
