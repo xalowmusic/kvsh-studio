@@ -7,39 +7,69 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Gochi+Hand&display=swap">
 <style>
-/* Layout: a paper desk in the Lemon Drops doodle style. Menu on top, a pile of taped polaroids (real Reels/TikTok players), crayon notes, stickers and hand-drawn windows you drag around. Light only, on purpose. */
+/* Layout: a wooden table (3D, with the carabiner, markers and the studio pin lying on it) under a paper menu. Polaroids with real Reels/TikTok players sit on the table, swap every 30s, and can be dragged, pinned and voted. Colors from the KVSH brand bible: off-white, black, mist, forest/moss green as the only accent. */
 @font-face{font-family:"KidType Crayon";src:url("fonts/KidTypeCrayon.ttf") format("truetype");font-display:swap}
 :root{
-  --paper:#faf7f0; --ink:#1c1c1c; --grey:#8a8578; --white:#fffdf8;
-  --green:#3f7a3d; --green-fill:#c8e6c0; --yellow:#e0b23e; --lilac:#9c8fc9; --coral:#e07a5f; --blue:#3f6fa3;
-  --line:rgba(28,28,28,.14);
+  --paper:#F2EDE4; --white:#FBF8F2; --ink:#0A0A08; --grey:#5E5A56; --mist:#D0CAC0; --forest:#1A3020; --moss:#2E5438; --moss-fill:#d5dfd0;
+  --line:rgba(10,10,8,.14);
   --crayon:"KidType Crayon","Gochi Hand","Comic Sans MS",cursive;
   --body:"Space Grotesk","Segoe UI",system-ui,sans-serif;
   --ease-out:cubic-bezier(0.23,1,0.32,1);
   --r:10px;
   --doodle:255px 15px 225px 15px/15px 225px 15px 255px;
-  --shadow:2px 3px 0 rgba(28,28,28,.12);
-  --shadow-lift:4px 8px 0 rgba(28,28,28,.12),0 18px 36px rgba(28,28,28,.16);
+  /* hard shadows, light from the upper left (same sun as the 3D table) */
+  --shadow:5px 7px 0 rgba(70,45,20,.22);
+  --shadow-lift:12px 18px 0 rgba(70,45,20,.16),0 22px 34px rgba(70,45,20,.18);
   color-scheme:light;
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{background:var(--paper);color:var(--ink);font:15px/1.45 var(--body);-webkit-font-smoothing:antialiased;overflow:hidden;display:flex;flex-direction:column}
-button,input,select{font:inherit;color:inherit}
-a{color:var(--blue)}
+body{color:var(--ink);font:15px/1.45 var(--body);-webkit-font-smoothing:antialiased;overflow:hidden;display:flex;flex-direction:column;
+  background:#dcc6a0 repeating-linear-gradient(176deg,rgba(120,80,40,.07) 0 2px,transparent 2px 11px,rgba(255,240,215,.08) 11px 17px,transparent 17px 29px)}
+#table{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;pointer-events:none}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--moss)}
 [hidden]{display:none!important}
 
-/* top bar */
-.bar{flex:none;display:flex;align-items:center;gap:4px;padding:8px 16px;padding-top:calc(8px + env(safe-area-inset-top,0px));background:var(--paper);border-bottom:2px solid var(--ink);z-index:99999;overflow-x:auto;white-space:nowrap}
-.brand{font-family:var(--crayon);font-size:26px;line-height:1;margin-right:12px;display:flex;align-items:center;gap:8px}
-.brand svg{flex:none}
+/* menu */
+.top{flex:none;position:relative;z-index:99999;background:var(--paper);border-bottom:2px solid var(--ink);box-shadow:0 5px 0 rgba(70,45,20,.18)}
+.bar,.feedbar{display:flex;align-items:center;gap:4px;padding:6px 16px;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.bar::-webkit-scrollbar,.feedbar::-webkit-scrollbar{display:none}
+.bar{padding-top:calc(8px + env(safe-area-inset-top,0px))}
+.feedbar{border-top:1.5px dashed var(--line);padding-bottom:7px}
+.brand{font-family:var(--crayon);font-size:26px;line-height:1;margin-right:10px;display:flex;align-items:center;gap:8px}
+.brand img{width:34px;height:34px;border-radius:50%;box-shadow:2px 3px 0 rgba(70,45,20,.25)}
 .mi{border:0;background:none;padding:5px 10px;border-radius:var(--doodle);cursor:pointer;font-weight:500;transition:transform 160ms var(--ease-out),background-color 150ms ease}
 .mi:active{transform:scale(.97)}
-@media (hover:hover) and (pointer:fine){.mi:hover{background:var(--green-fill)}}
-.mi:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.bar .right{margin-left:auto;display:flex;gap:12px;align-items:center;color:var(--grey);font-size:13px;font-variant-numeric:tabular-nums;padding-left:12px}
+@media (hover:hover) and (pointer:fine){.mi:hover{background:var(--moss-fill)}}
+.mi:focus-visible,.chip:focus-visible,.timer:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.right{margin-left:auto;display:flex;gap:8px;align-items:center;padding-left:12px}
+.count{color:var(--grey);font-size:13px;font-variant-numeric:tabular-nums}
+.me{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--ink);background:var(--white);border-radius:var(--doodle);padding:4px 12px 4px 5px;cursor:pointer;font-weight:700;font-size:14px;transition:transform 160ms var(--ease-out),background-color 150ms ease}
+.me:active{transform:scale(.97)}
+@media (hover:hover) and (pointer:fine){.me:hover{background:var(--moss-fill)}}
+.av{flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--mist);font-family:var(--crayon);font-weight:400;font-size:16px;line-height:1}
+.me.in .av{background:var(--moss);color:var(--paper)}
+.lbl{font-family:var(--crayon);font-size:20px;line-height:1;margin-right:6px}
+.chip{border:1.5px solid var(--ink);background:var(--white);border-radius:var(--doodle);padding:3px 11px 4px;font-size:13px;font-weight:500;cursor:pointer;transition:transform 160ms var(--ease-out),background-color 150ms ease,color 150ms ease}
+.chip:active{transform:scale(.97)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+@media (hover:hover) and (pointer:fine){.chip:not([aria-pressed="true"]):hover{background:var(--moss-fill)}}
+.timer{display:inline-flex;align-items:center;gap:6px;margin-left:10px;border:0;background:none;padding:3px 6px;border-radius:var(--doodle);cursor:pointer;font-size:13px;color:var(--grey);font-variant-numeric:tabular-nums;transition:transform 160ms var(--ease-out)}
+.timer:active{transform:scale(.97)}
+.timer svg{flex:none;rotate:-90deg}
+.timer circle{fill:none;stroke-width:2.5}
+.timer .trk{stroke:var(--mist)}
+.timer .run{stroke:var(--moss);stroke-linecap:round;stroke-dasharray:47.12;transition:stroke-dashoffset 250ms linear}
+.timer.hold .run{stroke:var(--grey)}
+.pop{position:fixed;z-index:100001;background:var(--white);border:2px solid var(--ink);border-radius:var(--r);box-shadow:var(--shadow);padding:6px;display:grid;gap:2px;min-width:170px;transform-origin:top left;transition:opacity 150ms var(--ease-out),transform 150ms var(--ease-out)}
+.pop.closed{opacity:0;transform:scale(.96);pointer-events:none}
+.pop button{display:flex;justify-content:space-between;gap:16px;border:0;background:none;text-align:left;padding:6px 9px;border-radius:6px;cursor:pointer;font-size:14px}
+.pop button span{color:var(--grey);font-variant-numeric:tabular-nums}
+.pop button:disabled{opacity:.4;cursor:default}
+@media (hover:hover) and (pointer:fine){.pop button:not(:disabled):hover{background:var(--moss-fill)}}
 
-.desk{position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none}
+.desk{position:relative;z-index:1;flex:1;min-height:0;overflow:hidden;touch-action:none}
 .item{position:absolute;left:0;top:0;will-change:transform;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none}
 .item.lifted{cursor:grabbing}
 .item:focus-visible{outline:2px dashed var(--ink);outline-offset:4px}
@@ -48,99 +78,137 @@ body.dragging iframe{pointer-events:none}
 /* polaroid */
 .pola{width:calc(var(--pw) + 20px);background:var(--white);padding:10px 10px 0;border:1.5px solid var(--ink);border-radius:3px;box-shadow:var(--shadow);transition:box-shadow 180ms var(--ease-out)}
 .pola.lifted{box-shadow:var(--shadow-lift)}
-.screen{position:relative;width:var(--pw);height:calc(var(--pw) * var(--ar));overflow:hidden;background:#ece7db;border:1.5px solid var(--ink);border-radius:2px}
-.screen iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;background:#ece7db}
-.ph{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:8px;text-align:center;padding:12px;color:var(--ink)}
+.screen{position:relative;width:var(--pw);height:calc(var(--pw) * var(--ar));overflow:hidden;background:var(--mist);border:1.5px solid var(--ink);border-radius:2px}
+.screen iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;background:var(--mist)}
+.ph{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:8px;text-align:center;padding:12px}
 .ph .net{font-family:var(--crayon);font-size:22px;line-height:1}
 .ph small{font-size:11px;color:var(--grey);line-height:1.3}
 .cap{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 2px 10px}
-.who{min-width:0;line-height:1.2}
+.who{min-width:0;line-height:1.2;cursor:pointer}
 .who b{display:block;font-family:var(--crayon);font-weight:400;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .who span{color:var(--grey);font-size:12px}
 .vote{flex:none;border:1.5px solid var(--ink);background:var(--white);border-radius:var(--doodle);padding:3px 10px;font-size:13px;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums;transition:transform 160ms var(--ease-out),background-color 150ms ease}
 .vote:active{transform:scale(.97)}
-.vote[aria-pressed="true"]{background:var(--green-fill)}
-.vote:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.tape{position:absolute;top:-11px;left:50%;width:62px;height:22px;translate:-50% 0;rotate:-4deg;background:rgba(224,178,62,.55);z-index:2;clip-path:polygon(3% 0,97% 4%,100% 50%,96% 100%,2% 96%,0 45%)}
-.tape.lilac{background:rgba(156,143,201,.55);rotate:6deg;left:28%}
+.vote[aria-pressed="true"]{background:var(--moss);color:var(--paper)}
+.vote:focus-visible,.clip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.tape{position:absolute;top:-11px;left:50%;width:64px;height:22px;translate:-50% 0;rotate:-4deg;background:rgba(232,226,214,.78);box-shadow:0 1px 1px rgba(70,45,20,.12);z-index:2;clip-path:polygon(3% 0,97% 4%,100% 50%,96% 100%,2% 96%,0 45%)}
+.tape.l{rotate:7deg;left:30%}
+/* the carabiner clip: pin a card so the feed doesn't swap it */
+.clip{position:absolute;z-index:4;top:-15px;right:-13px;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--ink);background:var(--white);display:grid;place-items:center;cursor:pointer;padding:0;box-shadow:2px 3px 0 rgba(70,45,20,.2);transition:transform 160ms var(--ease-out),background-color 150ms ease}
+.clip:active{transform:scale(.92)}
+.clip svg path{fill:none;stroke:var(--ink);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.clip[aria-pressed="true"]{background:var(--moss)}
+.clip[aria-pressed="true"] svg path{stroke:var(--paper)}
+@media (hover:hover) and (pointer:fine){.clip:not([aria-pressed="true"]):hover{background:var(--moss-fill)}}
 
-/* stickers (die-cut look: white rim + soft drop) */
-.stk{position:absolute;z-index:3;display:grid;place-items:center;text-align:center;font-family:var(--crayon);line-height:.95;pointer-events:none;color:var(--ink);border:3px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.18)}
-.stk.round{width:62px;height:62px;border-radius:50%;font-size:17px}
-.stk.pill{padding:5px 12px 6px;border-radius:99px;font-size:18px;white-space:nowrap}
-.stk.drop{width:58px;height:58px;border-radius:50% 50% 50% 8%;rotate:-45deg}
-.stk.drop span{rotate:45deg;font-size:16px}
-.loose{position:absolute}
-.loose .stk{position:static;pointer-events:auto}
-.loose.lifted .stk{box-shadow:0 10px 18px rgba(0,0,0,.22)}
+/* seals, stuck to the card: they move and tilt with it */
+.seal{position:absolute;z-index:3;display:grid;place-items:center;align-content:center;text-align:center;font-family:var(--crayon);line-height:.9;border:3px solid #fff;box-shadow:2px 3px 0 rgba(70,45,20,.22);pointer-events:none}
+.s-top{width:62px;height:62px;border-radius:50%;background:var(--ink);color:var(--paper);font-size:16px;left:-17px;top:20%;rotate:-9deg}
+.s-top b{display:block;font-weight:400;font-size:28px}
+.s-hot{width:60px;height:60px;border-radius:50%;background:var(--paper);color:var(--ink);font-size:17px;right:-16px;top:44%;rotate:8deg;box-shadow:inset 0 0 0 1.5px var(--ink),2px 3px 0 rgba(70,45,20,.22)}
+.s-new{padding:4px 13px 6px;border-radius:99px;background:var(--moss);color:var(--paper);font-size:20px;left:-13px;bottom:74px;rotate:-6deg}
 
-/* crayon notes and doodles */
-.note{width:180px;padding:14px 16px 18px;background:var(--yellow);font-family:var(--crayon);font-size:26px;line-height:1;box-shadow:var(--shadow);border-radius:2px}
-.note.paper{background:var(--white);border:1.5px solid var(--ink);font-family:var(--body);font-size:13px;line-height:1.4;width:210px}
-.note.paper b{font-family:var(--crayon);font-weight:400;font-size:20px;display:block;line-height:1;margin-bottom:4px}
-.doodle{pointer-events:none}
-.doodle svg{display:block;overflow:visible}
-.doodle path{fill:none;stroke:var(--ink);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+/* loose stickers and notes */
+.loose .stk{display:grid;place-items:center;text-align:center;font-family:var(--crayon);line-height:.95;border:3px solid #fff;box-shadow:3px 4px 0 rgba(70,45,20,.22)}
+.loose.lifted .stk{box-shadow:10px 14px 0 rgba(70,45,20,.15)}
+.stk.round{width:70px;height:70px;border-radius:50%;font-size:17px}
+.stk.pill{padding:5px 13px 7px;border-radius:99px;font-size:19px;white-space:nowrap}
+.note{width:178px;padding:13px 15px 16px;background:var(--mist);box-shadow:var(--shadow);border-radius:2px;font-size:13px;line-height:1.35;transition:box-shadow 180ms var(--ease-out)}
+.note.lifted{box-shadow:var(--shadow-lift)}
+.note b{display:block;font-family:var(--crayon);font-weight:400;font-size:24px;line-height:.95;margin:2px 0 6px}
+.note .sm{color:var(--grey);font-size:12px}
 
-/* hand-drawn windows */
-.win{width:var(--ww,300px);background:var(--white);border:2px solid var(--ink);border-radius:var(--r);box-shadow:var(--shadow);transition:box-shadow 180ms var(--ease-out)}
+/* windows */
+.win{width:var(--ww,300px);max-height:calc(100% - 16px);display:flex;flex-direction:column;background:var(--white);border:2px solid var(--ink);border-radius:var(--r);box-shadow:var(--shadow);transition:box-shadow 180ms var(--ease-out)}
 .win.lifted{box-shadow:var(--shadow-lift)}
-.tb{display:flex;align-items:center;gap:8px;padding:8px 12px 6px;border-bottom:2px solid var(--ink)}
-.tb .x{flex:none;width:22px;height:22px;border:0;background:none;padding:0;cursor:pointer;display:grid;place-items:center;border-radius:50%;transition:transform 160ms var(--ease-out),background-color 150ms}
+.tb{flex:none;display:flex;align-items:center;gap:8px;padding:8px 12px 6px;border-bottom:2px solid var(--ink)}
+.tb .x{flex:none;width:24px;height:24px;border:0;background:none;padding:0;cursor:pointer;display:grid;place-items:center;border-radius:50%;transition:transform 160ms var(--ease-out),background-color 150ms}
 .tb .x:active{transform:scale(.92)}
-@media (hover:hover) and (pointer:fine){.tb .x:hover{background:var(--green-fill)}}
+@media (hover:hover) and (pointer:fine){.tb .x:hover{background:var(--moss-fill)}}
 .tb .x svg path{stroke:var(--ink);stroke-width:2.2;stroke-linecap:round;fill:none}
 .tb .x:focus-visible{outline:2px solid var(--ink)}
 .tb .t{font-family:var(--crayon);font-size:22px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wb{padding:14px;display:grid;gap:10px;font-size:14px}
-.wb h2{margin:0;font-family:var(--crayon);font-weight:400;font-size:38px;line-height:.9}
+.wb{padding:14px;display:grid;gap:10px;font-size:14px;overflow-y:auto;overscroll-behavior:contain;cursor:auto}
+.wb h2{margin:0;font-family:var(--crayon);font-weight:400;font-size:36px;line-height:.9;overflow-wrap:anywhere}
 .muted{color:var(--grey)}
-.specs{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;font-variant-numeric:tabular-nums}
-.specs span{border:1.5px solid var(--ink);border-radius:var(--doodle);padding:2px 9px}
-.specs span:nth-child(1){background:var(--green-fill)}
+.specs,.tags,.tabs{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;font-variant-numeric:tabular-nums}
+.specs span,.tags span{border:1.5px solid var(--ink);border-radius:var(--doodle);padding:2px 9px}
+.specs span:first-child{background:var(--moss-fill)}
+.chip.sm{font-size:12px;padding:2px 9px 3px}
 .clock{font-size:12px;color:var(--grey);font-variant-numeric:tabular-nums}
 .rk{display:grid;margin:0;padding:0;list-style:none}
-.rk li{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:8px;align-items:center;padding:7px 0;border-top:1.5px dashed var(--line)}
+.rk li{display:grid;grid-template-columns:26px minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:7px 0;border-top:1.5px dashed var(--line)}
 .rk .n{font-family:var(--crayon);font-size:24px;line-height:1;text-align:center}
-.rk li:first-child .n{color:var(--coral)}
+.rk li:first-child .n{color:var(--moss)}
 .rk .w{min-width:0}
-.rk .w b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk .w b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+@media (hover:hover) and (pointer:fine){.rk .w b:hover{text-decoration:underline;text-decoration-thickness:1.5px}}
 .rk .w span{font-size:12px;color:var(--grey)}
+.play{flex:none;width:30px;height:28px;border:1.5px solid var(--ink);border-radius:var(--doodle);background:var(--white);cursor:pointer;display:grid;place-items:center;padding:0;transition:transform 160ms var(--ease-out)}
+.play:active{transform:scale(.95)}
+.play svg path{fill:var(--ink)}
+.empty{color:var(--grey);font-size:13px;padding:6px 0}
 .btn{display:inline-flex;align-items:center;justify-content:center;border:2px solid var(--ink);border-radius:var(--doodle);padding:8px 16px;font-weight:700;font-size:14px;cursor:pointer;background:var(--white);color:var(--ink);text-decoration:none;transition:transform 160ms var(--ease-out),background-color 150ms ease}
 .btn:active{transform:scale(.97)}
-.btn.go{background:var(--green-fill)}
-@media (hover:hover) and (pointer:fine){.btn:hover{background:var(--green-fill)}.btn.go:hover{background:#b6dcac}}
+.btn.go{background:var(--ink);color:var(--paper)}
+.btn.ghost{border-color:transparent;font-weight:500;color:var(--grey)}
+@media (hover:hover) and (pointer:fine){.btn:not(.go):hover{background:var(--moss-fill)}.btn.go:hover{background:var(--forest)}}
 .btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.big{position:relative;width:100%;overflow:hidden;background:#ece7db;border:1.5px solid var(--ink);border-radius:2px}
+.big{position:relative;width:100%;overflow:hidden;background:var(--mist);border:1.5px solid var(--ink);border-radius:2px}
 .big iframe{display:block;border:0}
 .big .ph{position:relative;min-height:220px}
+.head{display:flex;gap:12px;align-items:center}
+.head .av{width:54px;height:54px;font-size:30px}
+.head .av.me{background:var(--moss);color:var(--paper)}
+.bio{margin:0;font-size:14px;line-height:1.4}
 
+.form{display:grid;gap:10px}
 .wb label{display:grid;gap:4px;font-size:13px;font-weight:500}
-.wb input[type=text],.wb input[type=url],.wb select{width:100%;background:var(--paper);border:1.5px solid var(--ink);border-radius:var(--r);padding:9px 11px;font-size:15px;appearance:none}
-.wb input:focus,.wb select:focus{outline:none;box-shadow:0 0 0 3px var(--green-fill)}
+.wb input[type=text],.wb input[type=url],.wb select,.wb textarea{width:100%;background:var(--paper);border:1.5px solid var(--ink);border-radius:var(--r);padding:9px 11px;font-size:15px;appearance:none;resize:none}
+.wb input:focus,.wb select:focus,.wb textarea:focus{outline:none;box-shadow:0 0 0 3px var(--moss-fill)}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+fieldset{border:0;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+legend{font-size:13px;font-weight:500;padding:0;margin-bottom:6px}
+.pick{display:block!important;cursor:pointer}
+.pick input{position:absolute;opacity:0;pointer-events:none}
+.pick span{display:inline-block;border:1.5px solid var(--ink);border-radius:var(--doodle);padding:3px 10px 4px;font-size:13px;font-weight:500;background:var(--white);transition:background-color 150ms ease,color 150ms ease}
+.pick input:checked+span{background:var(--ink);color:var(--paper)}
+.pick input:focus-visible+span{outline:2px solid var(--ink);outline-offset:2px}
 .det{font-size:12px;min-height:16px;color:var(--grey)}
-.det.ok{color:var(--green)}.det.err{color:var(--coral)}
+.det.ok{color:var(--moss)}.det.err{color:#a2361f}
 .chk{display:flex!important;align-items:center;gap:8px;cursor:pointer}
-.chk input{accent-color:var(--green);width:16px;height:16px}
-.row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.chk input{accent-color:var(--moss);width:16px;height:16px}
+.row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;align-items:center}
 pre{margin:0;background:var(--paper);border:1.5px dashed var(--line);border-radius:var(--r);padding:8px;font:11px/1.45 ui-monospace,Menlo,Consolas,monospace;overflow-x:auto;white-space:pre;user-select:text}
 details summary{font-size:12px;color:var(--grey);cursor:pointer}
-.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));translate:-50% 0;background:var(--ink);color:var(--paper);padding:8px 16px 9px;border-radius:var(--doodle);font-family:var(--crayon);font-size:20px;z-index:100000;transition:opacity 200ms var(--ease-out),transform 200ms var(--ease-out)}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));translate:-50% 0;background:var(--ink);color:var(--paper);padding:8px 16px 9px;border-radius:var(--doodle);font-family:var(--crayon);font-size:20px;z-index:100002;transition:opacity 200ms var(--ease-out),transform 200ms var(--ease-out)}
 .toast[hidden]{display:block!important;opacity:0;transform:translateY(8px);pointer-events:none}
-@media (max-width:560px){.bar{padding-inline:12px}.brand{font-size:22px}.mi{padding:5px 7px;font-size:14px}.note{width:150px;font-size:22px}}
-@media (prefers-reduced-motion:reduce){.toast{transition:opacity 200ms ease}.toast[hidden]{transform:none}}
+@media (max-width:560px){.bar,.feedbar{padding-inline:12px}.brand{font-size:22px}.brand img{width:28px;height:28px}.mi{padding:5px 7px;font-size:14px}.count{display:none}.brand span,.long,.lbl{display:none}.brand{margin-right:4px}.timer{order:-1;margin:0 4px 0 0;padding-left:0}}
+@media (prefers-reduced-motion:reduce){.toast{transition:opacity 200ms ease}.toast[hidden]{transform:none}.pop{transition:opacity 150ms ease}.pop.closed{transform:none}}
 </style>
 </head>
 <body>
-<div class="bar" role="menubar" aria-label="Menu">
-  <span class="brand"><svg width="18" height="22" viewBox="0 0 18 22" aria-hidden="true"><path d="M9 1.5C6 6 2.2 9.6 2.2 14a6.8 6.8 0 0 0 13.6 0C15.8 9.6 12 6 9 1.5Z" fill="#c8e6c0" stroke="#1c1c1c" stroke-width="1.8" stroke-linejoin="round"/></svg>kvsh studio</span>
-  <button class="mi" role="menuitem" id="m-post">postar</button>
-  <button class="mi" role="menuitem" id="m-cover">cover da semana</button>
-  <button class="mi" role="menuitem" id="m-tidy">arrumar</button>
-  <button class="mi" role="menuitem" id="m-mess">bagunçar</button>
-  <span class="right"><span id="count"></span><span id="time"></span></span>
+<canvas id="table" aria-hidden="true"></canvas>
+<div class="top">
+  <div class="bar" role="menubar" aria-label="Menu">
+    <span class="brand"><img src="img/kvsh-studio-pin.png" alt="KVSH Studio"><span>kvsh studio</span></span>
+    <button class="mi" role="menuitem" id="m-post">postar</button>
+    <button class="mi" role="menuitem" id="m-rank">ranking</button>
+    <button class="mi" role="menuitem" id="m-cover">cover<span class="long"> da semana</span></button>
+    <span class="right"><span class="count" id="count"></span><button class="me" id="m-me"><span class="av" id="me-av">+</span><span id="me-t">criar perfil</span></button></span>
+  </div>
+  <div class="feedbar" role="toolbar" aria-label="O que aparece na mesa">
+    <span class="lbl">na mesa:</span>
+    <button class="chip" data-mode="sugerido" aria-pressed="true">sugerido</button>
+    <button class="chip" data-mode="novos" aria-pressed="false">novos</button>
+    <button class="chip" data-mode="top" aria-pressed="false">top</button>
+    <button class="chip" data-mode="alta" aria-pressed="false">em alta</button>
+    <button class="chip" id="c-inst" aria-pressed="false" aria-haspopup="true" aria-expanded="false">instrumento ▾</button>
+    <button class="timer" id="timer"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle class="trk" cx="10" cy="10" r="7.5"/><circle class="run" id="ring" cx="10" cy="10" r="7.5"/></svg><span id="timer-t"></span></button>
+    <span class="right"><button class="mi" id="m-tidy">arrumar</button><button class="mi" id="m-mess">bagunçar</button></span>
+  </div>
 </div>
+<div class="pop closed" id="pop" role="menu" aria-label="Instrumentos"></div>
 <div class="desk" id="desk"></div>
 <div class="toast" id="toast" hidden></div>
 
@@ -195,38 +263,65 @@ const SANDBOX = (() => { try { return window.top !== window.self; } catch (e) { 
 
 const INSTR = ["vocal","guitarra","baixo","bateria","percussão","teclado","sax","violino","trompete","produção"];
 const COVER = { song: "cante por nós", by: "KVSH, Vintage Culture, Breno Miranda", bpm: 122, key: "lá menor", week: 40 };
-// Real public posts, standing in for submissions until musicians send their own.
+const ROTATE = 30;
+const DAY = 864e5, T0 = Date.now();
+// Real public posts, standing in for musicians' submissions. Votes, "hot" (votes in the last 48h) and age are test numbers.
 const SEED = [
-  { id:"r1", net:"tiktok", vid:"7613791347987778817", url:"https://www.tiktok.com/@kvshtok/video/7613791347987778817", h:"@kvshtok", city:"BH", inst:"produção", cover:true, votes:512, stk:["lemon"] },
-  { id:"r2", net:"tiktok", vid:"7410470020356050208", url:"https://www.tiktok.com/@jakesax/video/7410470020356050208", h:"@jakesax", city:"—", inst:"sax", cover:true, votes:388, stk:["top"] },
-  { id:"r3", net:"instagram", vid:"C8CaBfWs1mr", url:"https://www.instagram.com/reel/C8CaBfWs1mr/", h:"@anthonybutenyi", city:"—", inst:"trompete", cover:true, votes:341 },
-  { id:"r4", net:"tiktok", vid:"7374021398081162504", url:"https://www.tiktok.com/@yarden_saxophone/video/7374021398081162504", h:"@yarden_saxophone", city:"—", inst:"sax", cover:true, votes:297, stk:["fogo"] },
-  { id:"r5", net:"instagram", vid:"DKcalTzoftf", url:"https://www.instagram.com/reel/DKcalTzoftf/", h:"@martingarrix", city:"—", inst:"produção", cover:false, votes:260 },
-  { id:"r6", net:"tiktok", vid:"7397040267813080336", url:"https://www.tiktok.com/@thedrumpath/video/7397040267813080336", h:"@thedrumpath", city:"—", inst:"bateria", cover:true, votes:214, stk:["novo"] },
-  { id:"r7", net:"instagram", vid:"DQCkNLtgqEe", url:"https://www.instagram.com/reel/DQCkNLtgqEe/", h:"@teddysphotos", city:"—", inst:"vocal", cover:false, votes:198 },
-  { id:"r8", net:"instagram", vid:"DOJukicCQ2_", url:"https://www.instagram.com/reel/DOJukicCQ2_/", h:"@karanaujla", city:"—", inst:"vocal", cover:false, votes:152 },
-];
-const STICKERS = {
-  lemon: `<span class="stk drop" style="background:var(--green-fill);right:-14px;top:-12px"><span>lemon</span></span>`,
-  top: `<span class="stk round" style="background:var(--yellow);left:-16px;top:32%;rotate:-12deg">top 1</span>`,
-  fogo: `<span class="stk pill" style="background:var(--coral);right:-12px;bottom:58px;rotate:-7deg">tá pegando fogo</span>`,
-  novo: `<span class="stk round" style="background:var(--lilac);left:-12px;bottom:62px;rotate:-10deg">novo</span>`,
-};
+  { id:"r1", net:"tiktok", vid:"7613791347987778817", url:"https://www.tiktok.com/@kvshtok/video/7613791347987778817", h:"@kvshtok", city:"Nova Lima", inst:"produção", cover:true, votes:512, hot:40, days:20 },
+  { id:"r2", net:"tiktok", vid:"7410470020356050208", url:"https://www.tiktok.com/@jakesax/video/7410470020356050208", h:"@jakesax", city:"—", inst:"sax", cover:true, votes:388, hot:12, days:30 },
+  { id:"r3", net:"instagram", vid:"C8CaBfWs1mr", url:"https://www.instagram.com/reel/C8CaBfWs1mr/", h:"@anthonybutenyi", city:"—", inst:"trompete", cover:true, votes:341, hot:5, days:25 },
+  { id:"r4", net:"tiktok", vid:"7374021398081162504", url:"https://www.tiktok.com/@yarden_saxophone/video/7374021398081162504", h:"@yarden_saxophone", city:"—", inst:"sax", cover:true, votes:297, hot:66, days:9 },
+  { id:"r12", net:"tiktok", vid:"7200786240717819179", url:"https://www.tiktok.com/@andrewfreedmusic/video/7200786240717819179", h:"@andrewfreedmusic", city:"—", inst:"baixo", cover:false, votes:289, hot:15, days:18 },
+  { id:"r5", net:"instagram", vid:"DKcalTzoftf", url:"https://www.instagram.com/reel/DKcalTzoftf/", h:"@martingarrix", city:"—", inst:"produção", cover:false, votes:260, hot:8, days:40 },
+  { id:"r9", net:"tiktok", vid:"7252705782926495003", url:"https://www.tiktok.com/@marcin.music/video/7252705782926495003", h:"@marcin.music", city:"—", inst:"guitarra", cover:true, votes:233, hot:48, days:2 },
+  { id:"r6", net:"tiktok", vid:"7397040267813080336", url:"https://www.tiktok.com/@thedrumpath/video/7397040267813080336", h:"@thedrumpath", city:"—", inst:"bateria", cover:true, votes:214, hot:22, days:3 },
+  { id:"r7", net:"instagram", vid:"DQCkNLtgqEe", url:"https://www.instagram.com/reel/DQCkNLtgqEe/", h:"@teddysphotos", city:"—", inst:"vocal", cover:false, votes:198, hot:71, days:6 },
+  { id:"r11", net:"tiktok", vid:"7322752567656631584", url:"https://www.tiktok.com/@rankka_music/video/7322752567656631584", h:"@rankka_music", city:"—", inst:"produção", cover:false, votes:176, hot:18, days:12 },
+  { id:"r13", net:"tiktok", vid:"7329586767919664427", url:"https://www.tiktok.com/@charlesberthoud/video/7329586767919664427", h:"@charlesberthoud", city:"—", inst:"baixo", cover:true, votes:167, hot:52, days:4 },
+  { id:"r8", net:"instagram", vid:"DOJukicCQ2_", url:"https://www.instagram.com/reel/DOJukicCQ2_/", h:"@karanaujla", city:"—", inst:"vocal", cover:false, votes:152, hot:9, days:15 },
+  { id:"r10", net:"tiktok", vid:"7367264507594427681", url:"https://www.tiktok.com/@leodiangilla/video/7367264507594427681", h:"@leodiangilla", city:"—", inst:"percussão", cover:true, votes:121, hot:35, days:1 },
+  { id:"r14", net:"tiktok", vid:"7305629831251660074", url:"https://www.tiktok.com/@sttgtt/video/7305629831251660074", h:"@sttgtt", city:"—", inst:"teclado", cover:false, votes:94, hot:27, days:5 },
+].map(p => ({ ...p, at: T0 - p.days * DAY }));
 
 const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
-let mine = store.get("kvsh.posts2", []);
+let mine = store.get("kvsh.posts3", []);
+let me = store.get("kvsh.me", null);
 const voted = new Set(store.get("kvsh.voted2", []));
+const pins = new Set(store.get("kvsh.pins", []));
+const follows = new Set(store.get("kvsh.follows", []));
 const posts = () => [...mine, ...SEED];
+const byId = id => posts().find(p => p.id === id);
 const votesOf = p => p.votes + (voted.has(p.id) ? 1 : 0);
+const hotOf = p => (p.hot || 0) + (voted.has(p.id) ? 1 : 0);
+const isNew = p => Date.now() - p.at < 7 * DAY;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 const rand = (a, b) => a + Math.random() * (b - a);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const netName = p => p.net === "instagram" ? "instagram" : "tiktok";
+const initial = s => (String(s || "?").replace(/^@/, "")[0] || "?").toUpperCase();
+
+// Seals: top 3 by votes, top 3 by votes in the last 48h, and anything posted this week.
+let topRank = new Map(), hotSet = new Set();
+function rankUp() {
+  const all = posts();
+  topRank = new Map([...all].sort((a, b) => votesOf(b) - votesOf(a)).slice(0, 3).map((p, i) => [p.id, i + 1]));
+  hotSet = new Set([...all].filter(p => hotOf(p) > 0).sort((a, b) => hotOf(b) - hotOf(a)).slice(0, 3).map(p => p.id));
+}
+function seals(p) {
+  const out = [], r = topRank.get(p.id);
+  if (r) out.push(`<span class="seal s-top">top<b>${r}</b></span>`);
+  if (hotSet.has(p.id)) out.push(`<span class="seal s-hot">em<br>alta</span>`);
+  if (isNew(p)) out.push(`<span class="seal s-new">novo</span>`);
+  return out.slice(0, 2).join("");
+}
 
 // Native player sizes. Instagram's embed includes its header and footer; TikTok's player is just the video.
 const PLAYER = {
   instagram: { w: 326, h: 580, src: p => `https://www.instagram.com/reel/${p.vid}/embed/` },
   tiktok: { w: 324, h: 576, src: p => `https://www.tiktok.com/player/v1/${p.vid}?description=0&music_info=0&rel=0` },
 };
+const CLIP_SVG = `<svg width="18" height="22" viewBox="0 0 18 22" aria-hidden="true"><path d="M7.6 2.2C4.2 2.2 2.4 4.6 2.4 8v6.4c0 3.4 2 5.6 5.2 5.6s5.3-2 5.9-5.2L15.4 6c.5-2.3-.9-3.8-3-3.8Z"/><path d="M11.8 6.4 10.3 15"/></svg>`;
+const PLAY_SVG = `<svg width="10" height="12" viewBox="0 0 10 12" aria-hidden="true"><path d="M1 1.2v9.6L9.2 6Z"/></svg>`;
 
 const desk = document.getElementById("desk");
 let z = 10;
@@ -243,7 +338,7 @@ function place(el, x, y, r, { drop = false } = {}) {
   apply();
   if (drop) it.my.to(y, { damping: .6, response: .5 });
   el.style.zIndex = ++z;
-  if (el.tabIndex < 0) el.tabIndex = 0;
+  if (el.tabIndex < 0 && !el.classList.contains("deco")) el.tabIndex = 0;
   items.set(el, it);
   return it;
 }
@@ -256,19 +351,14 @@ function scatterPos(el) {
   return { x: rand(0, Math.max(0, b.W - b.w)), y: rand(0, Math.max(0, b.H - b.h * .75)) };
 }
 
-// Inside the Claude preview the players are blocked, so the photo shows where the video comes from.
 function placeholder(p) {
   return `<div class="ph"><span class="net">${p.net === "instagram" ? "reels" : "tiktok"}</span><small>${esc(p.h)}<br>toca no site publicado</small></div>`;
 }
-
 // Fits a native-size player into a box by scaling it, so the real controls still work.
 function playerInto(box, p, width) {
   const P = PLAYER[p.net], k = width / P.w;
   box.style.setProperty("--ar", P.h / P.w);
-  if (SANDBOX) {
-    box.innerHTML = placeholder(p);
-    return;
-  }
+  if (SANDBOX) { box.innerHTML = placeholder(p); return; }
   const f = document.createElement("iframe");
   f.src = P.src(p); f.width = P.w; f.height = P.h; f.loading = "lazy";
   f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen"; f.allowFullscreen = true;
@@ -277,17 +367,20 @@ function playerInto(box, p, width) {
   box.appendChild(f);
 }
 
+const hovered = new Set();
 function polaroid(p) {
   const el = document.createElement("div");
   el.className = "item pola"; el.dataset.post = p.id;
   el.setAttribute("aria-label", `${p.h}, ${p.inst}. Enter abre, setas movem`);
-  const tape = Math.random() < .5 ? `<span class="tape${Math.random() < .4 ? " lilac" : ""}"></span>` : "";
+  const tape = Math.random() < .55 ? `<span class="tape${Math.random() < .4 ? " l" : ""}"></span>` : "";
   el.innerHTML = `${tape}<div class="screen"></div>
-    <div class="cap"><div class="who" data-open-post="${p.id}"><b>${esc(p.h)}</b><span>${esc(p.inst)} · ${netName(p)}</span></div>
-    <button class="vote" data-vote="${p.id}" aria-pressed="${voted.has(p.id)}">▲ ${votesOf(p)}</button></div>
-    ${(p.stk || []).map(k => STICKERS[k] || "").join("")}`;
-  const pw = parseFloat(getComputedStyle(desk).getPropertyValue("--pw")) || 180;
-  playerInto(el.querySelector(".screen"), p, pw);
+    <div class="cap"><div class="who"><b>${esc(p.h)}</b><span>${esc(p.inst)} · ${netName(p)}</span></div>
+    <button class="vote" data-vote="${p.id}" aria-pressed="${voted.has(p.id)}" aria-label="votar em ${esc(p.h)}">▲ ${votesOf(p)}</button></div>
+    ${seals(p)}
+    <button class="clip" data-pin="${p.id}" aria-pressed="${pins.has(p.id)}" title="prender na mesa" aria-label="prender na mesa">${CLIP_SVG}</button>`;
+  playerInto(el.querySelector(".screen"), p, L.pw || 180);
+  el.addEventListener("pointerenter", e => { if (e.pointerType === "mouse") hovered.add(el); });
+  el.addEventListener("pointerleave", () => hovered.delete(el));
   return el;
 }
 function note(html, cls = "") { const el = document.createElement("div"); el.className = "item note " + cls; el.innerHTML = html; return el; }
@@ -300,41 +393,226 @@ function win(id, title, body, width) {
   el.innerHTML = `<div class="tb"><button class="x" aria-label="Fechar"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M1.5 1.8 10.4 10.2M10.2 1.4 1.7 10.6"/></svg></button><span class="t">${esc(title)}</span></div><div class="wb">${body}</div>`;
   return { el, fresh: true };
 }
+function openWin(id, title, body, width, at) {
+  const W = Math.min(width, desk.clientWidth - 16);
+  const { el, fresh } = win(id, title, body, W);
+  if (fresh) {
+    const x = at?.x ?? (desk.clientWidth - W) / 2 + rand(-40, 40);
+    place(el, clamp(x, 8, desk.clientWidth - W - 8), at?.y ?? Math.max(8, desk.clientHeight * .06), rand(-1.5, 1.5), { drop: true });
+  }
+  return el;
+}
 function front(el) { el.style.zIndex = ++z; }
 function closeItem(el) {
-  const it = items.get(el); if (!it) return;
-  it.ms.to(.85, { response: .2 }); el.style.transition = "opacity 160ms"; el.style.opacity = 0;
-  setTimeout(() => { el.remove(); items.delete(el); }, 170);
+  const it = items.get(el); if (!it || el.dataset.gone) return;
+  el.dataset.gone = 1; hovered.delete(el);
+  it.ms.to(.9, { response: .2 }); el.style.transition = "opacity 160ms"; el.style.opacity = 0;
+  setTimeout(() => { el.remove(); items.delete(el); updateCount(); }, 170);
 }
 
+/* ---------- the table: which posts are on it, swapped every 30s ---------- */
+const feed = { mode: "sugerido", inst: null, cursor: 0, left: ROTATE, paused: false, playing: false, holdUntil: 0 };
+let L = {};
+function measure() {
+  const W = desk.clientWidth, H = desk.clientHeight, narrow = W < 560;
+  const pw = narrow ? Math.min(150, W * .38) : clamp((H * .6 - 64) / 1.78, 130, 190);
+  desk.style.setProperty("--pw", pw + "px");
+  const cw = pw + 20, ch = pw * 1.78 + 64;
+  const n = narrow ? 3 : clamp(Math.round((W - 40) / (cw * .86)), 3, 7);
+  L = { W, H, narrow, pw, cw, ch, n };
+}
+// Cards spread in a loose row across the top; the bottom of the table stays visible.
+function slotPos(i) {
+  const { W, H, cw, ch, n } = L, step = (W - cw - 24) / Math.max(1, n - 1);
+  const x = 12 + step * i + rand(-step * .16, step * .16);
+  const y = 12 + rand(0, Math.max(0, Math.min(60, H - ch - 140)));
+  return { x: clamp(x, 4, W - cw - 4), y };
+}
+function pool() {
+  const all = posts();
+  const byTop = [...all].sort((a, b) => votesOf(b) - votesOf(a));
+  const byNew = all.filter(isNew).sort((a, b) => b.at - a.at);
+  const byHot = all.filter(p => hotOf(p) > 0).sort((a, b) => hotOf(b) - hotOf(a));
+  if (feed.mode === "top") return byTop.slice(0, 10);
+  if (feed.mode === "novos") return byNew;
+  if (feed.mode === "alta") return byHot.slice(0, Math.max(6, Math.ceil(all.length / 2)));
+  if (feed.mode === "inst") return byTop.filter(p => p.inst === feed.inst);
+  // sugerido: one from the top, one going up, one new, and around again
+  const out = [], seen = new Set(), lanes = [byTop, byHot, byNew];
+  for (let i = 0; i < all.length * 3; i++) {
+    const p = lanes[i % 3][Math.floor(i / 3)];
+    if (p && !seen.has(p.id)) { seen.add(p.id); out.push(p); }
+  }
+  all.forEach(p => { if (!seen.has(p.id)) out.push(p); });
+  return out;
+}
+const cardsOnDesk = () => [...items.keys()].filter(el => el.classList.contains("pola") && !el.dataset.gone);
+function nextPost(exclude) {
+  const pl = pool();
+  for (let k = 0; k < pl.length; k++) {
+    const p = pl[(feed.cursor + k) % pl.length];
+    if (!exclude.has(p.id)) { feed.cursor = (feed.cursor + k + 1) % pl.length; return p; }
+  }
+  return null;
+}
+function fill() {
+  const cards = cardsOnDesk(), used = new Set(cards.map(c => +c.dataset.slot)), ids = new Set(cards.map(c => c.dataset.post));
+  let k = 0;
+  for (let s = 0; s < L.n; s++) {
+    if (used.has(s)) continue;
+    const p = nextPost(ids); if (!p) break;
+    ids.add(p.id);
+    const el = polaroid(p); el.dataset.slot = s; desk.appendChild(el);
+    const { x, y } = slotPos(s), it = place(el, x, y, rand(-7, 7));
+    enter(el, it, k++);
+  }
+  updateCount();
+}
+function canRotate() {
+  const cards = cardsOnDesk(), ids = new Set(cards.map(c => c.dataset.post));
+  return cards.some(c => !pins.has(c.dataset.post)) && pool().some(p => !ids.has(p.id));
+}
+function rotate() {
+  const all = cardsOnDesk(), ids = new Set(all.map(c => c.dataset.post));
+  all.filter(c => !pins.has(c.dataset.post)).forEach((el, i) => {
+    const p = nextPost(ids); if (!p) return;
+    ids.add(p.id);
+    setTimeout(() => swap(el, p), i * 120);
+  });
+}
+// The new card lands about where the old one was, so a table someone arranged stays arranged.
+function swap(old, p) {
+  const it = items.get(old); if (!it || old.dataset.gone) return;
+  const el = polaroid(p); el.dataset.slot = old.dataset.slot;
+  const x = clamp(it.x + rand(-20, 20), -L.cw * .2, L.W - L.cw * .8), y = clamp(it.y + rand(-10, 10), 0, L.H - 120);
+  closeItem(old);
+  desk.appendChild(el);
+  el.style.opacity = 0;
+  place(el, x, y, rand(-7, 7), { drop: true });
+  requestAnimationFrame(() => { el.style.transition = "opacity 220ms cubic-bezier(0.23,1,0.32,1)"; el.style.opacity = 1; });
+}
+function setMode(mode, inst) {
+  feed.mode = mode; feed.inst = inst || null; feed.cursor = 0; feed.left = ROTATE;
+  document.querySelectorAll("[data-mode]").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === mode));
+  const ci = document.getElementById("c-inst");
+  ci.setAttribute("aria-pressed", mode === "inst"); ci.textContent = mode === "inst" ? `${inst} ▾` : "instrumento ▾";
+  const out = cardsOnDesk().filter(c => !pins.has(c.dataset.post));
+  out.forEach((el, i) => setTimeout(() => closeItem(el), i * 30));
+  setTimeout(() => {
+    fill();
+    if (!cardsOnDesk().length) toast(mode === "inst" ? `ninguém de ${inst} ainda. bora ser o primeiro.` : "nada aqui ainda.");
+  }, out.length * 30 + 140);
+}
+function pausedWhy() {
+  if (feed.paused) return "parado";
+  if (!canRotate()) return "tudo";
+  if (document.hidden || drag || feed.playing || Date.now() < feed.holdUntil || document.getElementById("w-video")) return "hold";
+  if ([...hovered].some(el => el.isConnected && !el.dataset.gone)) return "hold";
+  return "";
+}
+const ring = document.getElementById("ring"), timerEl = document.getElementById("timer"), timerT = document.getElementById("timer-t");
+function drawTimer(why) {
+  const s = Math.ceil(feed.left);
+  timerT.textContent = innerWidth < 560 ? (why === "tudo" ? "tudo" : why === "parado" ? "parado" : `${s}s`)
+    : why === "tudo" ? "tudo na mesa" : why === "parado" ? "parado" : why === "hold" ? `segurando · ${s}s` : `troca em ${s}s`;
+  timerEl.classList.toggle("hold", !!why);
+  timerEl.setAttribute("aria-label", why === "parado" ? "Voltar a trocar os vídeos" : "Parar a troca dos vídeos");
+  ring.style.strokeDashoffset = 47.12 * (1 - (why === "tudo" ? 1 : feed.left / ROTATE));
+}
+setInterval(() => {
+  const why = pausedWhy();
+  if (!why) { feed.left -= .25; if (feed.left <= 0) { feed.left = ROTATE; rotate(); } }
+  drawTimer(why);
+}, 250);
+// Playing a video moves focus into its iframe; hold the table until the person clicks back on the page.
+addEventListener("blur", () => setTimeout(() => { if (document.activeElement?.tagName === "IFRAME") feed.playing = true; }));
+addEventListener("focus", () => { feed.playing = false; });
+
+/* ---------- windows ---------- */
 function coverBody() {
   const list = posts().filter(p => p.cover).sort((a, b) => votesOf(b) - votesOf(a)).slice(0, 5);
   return `<div class="muted">semana ${COVER.week}</div><h2>${COVER.song}</h2><div class="muted">${COVER.by}</div>
     <div class="specs"><span>${COVER.bpm} bpm</span><span>${COVER.key}</span><span>9:16, até 90s</span></div>
     <div class="clock" data-clock></div>
-    <ol class="rk">${list.map((p, i) => `<li><span class="n">${i + 1}</span><span class="w"><b>${esc(p.h)}</b><span>${esc(p.inst)} · ${netName(p)}</span></span><button class="vote" data-vote="${p.id}" aria-pressed="${voted.has(p.id)}">▲ ${votesOf(p)}</button></li>`).join("")}</ol>
+    <ol class="rk">${list.map((p, i) => rankRow(p, i)).join("")}</ol>
     <button class="btn go" data-open="post-cover">mandar meu cover</button>`;
 }
-function openCover(at) {
-  const { el, fresh } = win("w-cover", "cover da semana", coverBody(), Math.min(290, desk.clientWidth - 24));
-  if (fresh) place(el, at?.x ?? Math.max(8, desk.clientWidth - 310), at?.y ?? 18, rand(-1.5, 1.5), { drop: true });
+function rankRow(p, i) {
+  return `<li><span class="n">${i + 1}</span><span class="w"><b data-artist="${esc(p.h)}">${esc(p.h)}</b><span>${esc(p.inst)} · ${esc(p.city)}</span></span>
+    <button class="play" data-play="${p.id}" aria-label="ver vídeo de ${esc(p.h)}">${PLAY_SVG}</button>
+    <button class="vote" data-vote="${p.id}" aria-pressed="${voted.has(p.id)}" aria-label="votar em ${esc(p.h)}">▲ ${votesOf(p)}</button></li>`;
+}
+function openCover() {
+  openWin("w-cover", "cover da semana", coverBody(), 300, { x: desk.clientWidth - 320 });
   tick();
 }
+function rankBody(tab) {
+  const insts = INSTR.filter(i => posts().some(p => p.inst === i));
+  const list = posts().filter(p => tab === "geral" || p.inst === tab).sort((a, b) => votesOf(b) - votesOf(a)).slice(0, 8);
+  return `<div class="tabs">${["geral", ...insts].map(t => `<button class="chip sm" data-rk="${t}" aria-pressed="${t === tab}">${t}</button>`).join("")}</div>
+    <ol class="rk">${list.map(rankRow).join("")}</ol>
+    <div class="muted" style="font-size:12px">${tab === "geral" ? "todo mundo, por votos." : `quem toca ${tab}, por votos.`}</div>`;
+}
+function openRank(tab = document.getElementById("w-rank")?.dataset.tab || "geral") {
+  const el = openWin("w-rank", "ranking", rankBody(tab), 330, { x: 16 });
+  el.dataset.tab = tab;
+}
 function postBody(cover) {
-  return `<form id="pf" novalidate style="display:grid;gap:10px">
+  const mineFirst = me ? [...me.inst, ...INSTR.filter(i => !me.inst.includes(i))] : INSTR;
+  return `<form id="pf" class="form" novalidate>
+    <div class="muted">postando como <b>${esc(me.h)}</b></div>
     <label for="f-url">link do reels ou tiktok<input type="url" id="f-url" placeholder="cola aqui" autocomplete="off"></label>
     <div class="det" id="det" aria-live="polite"></div>
-    <div class="two"><label for="f-h">seu @<input type="text" id="f-h" placeholder="@voce"></label>
-    <label for="f-city">cidade<input type="text" id="f-city" placeholder="BH"></label></div>
-    <label for="f-inst">o que você faz no vídeo<select id="f-inst">${INSTR.map(i => `<option>${i}</option>`).join("")}</select></label>
+    <label for="f-inst">o que você faz no vídeo<select id="f-inst">${mineFirst.map(i => `<option>${i}</option>`).join("")}</select></label>
     <label class="chk" for="f-cover"><input type="checkbox" id="f-cover"${cover ? " checked" : ""}> entrar no cover da semana</label>
     <div class="row"><button class="btn go" type="submit">jogar na mesa</button></div></form>`;
 }
+let afterProfile = null;
 function openPost(cover) {
-  const { el, fresh } = win("w-post", "postar", postBody(cover), Math.min(300, desk.clientWidth - 24));
-  if (fresh) place(el, Math.max(8, (desk.clientWidth - 300) / 2 + rand(-30, 30)), Math.max(8, desk.clientHeight * .1), rand(-2, 2), { drop: true });
+  if (!me) { afterProfile = () => openPost(cover); openProfile("primeiro o perfil, depois o vídeo. leva meio minuto."); return; }
+  const el = openWin("w-post", "postar", postBody(cover), 310);
   front(el);
   setTimeout(() => el.querySelector("#f-url")?.focus({ preventScroll: true }), 60);
+}
+function profileBody(reason) {
+  const p = me || { name: "", h: "", city: "", inst: [], bio: "" };
+  return `${reason ? `<div class="muted">${esc(reason)}</div>` : ""}<form id="prof" class="form" novalidate>
+    <label for="p-name">nome<input type="text" id="p-name" value="${esc(p.name)}" placeholder="como te chamam" autocomplete="name"></label>
+    <div class="two"><label for="p-h">seu @<input type="text" id="p-h" value="${esc(p.h)}" placeholder="@voce" autocomplete="off" autocapitalize="none"></label>
+    <label for="p-city">cidade<input type="text" id="p-city" value="${esc(p.city)}" placeholder="BH"></label></div>
+    <fieldset><legend>o que você toca</legend>${INSTR.map(i => `<label class="pick"><input type="checkbox" value="${i}"${p.inst.includes(i) ? " checked" : ""}><span>${i}</span></label>`).join("")}</fieldset>
+    <label for="p-bio">uma linha sobre você<textarea id="p-bio" rows="2" maxlength="140" placeholder="3am. ainda no estúdio. o beat tá quase.">${esc(p.bio)}</textarea></label>
+    <div class="det" id="pdet" aria-live="polite"></div>
+    <div class="row"><button class="btn go" type="submit">${me ? "salvar" : "criar perfil"}</button></div></form>`;
+}
+function openProfile(reason) {
+  const el = openWin("w-me", me ? "editar perfil" : "criar perfil", profileBody(reason), 330);
+  setTimeout(() => el.querySelector("#p-name")?.focus({ preventScroll: true }), 60);
+}
+function videoList(list) {
+  return list.length ? `<ol class="rk">${list.map(rankRow).join("")}</ol>` : `<div class="empty">nenhum vídeo ainda.</div>`;
+}
+function openMe() {
+  if (!me) return openProfile();
+  const list = posts().filter(p => p.h.toLowerCase() === me.h.toLowerCase());
+  const body = `<div class="head"><span class="av me">${initial(me.name)}</span><div><h2>${esc(me.name)}</h2><div class="muted">${esc(me.h)}${me.city ? " · " + esc(me.city) : ""}</div></div></div>
+    <div class="tags">${me.inst.map(i => `<span>${esc(i)}</span>`).join("")}</div>
+    ${me.bio ? `<p class="bio">${esc(me.bio)}</p>` : ""}
+    <div class="muted" style="font-size:12px">seus vídeos</div>${videoList(list)}
+    <div class="row"><button class="btn ghost" data-open="logout">sair</button><button class="btn" data-open="profile-edit">editar</button><button class="btn go" data-open="post">postar vídeo</button></div>`;
+  openWin("w-me", "meu perfil", body, 330);
+}
+function openArtist(h) {
+  if (me && h.toLowerCase() === me.h.toLowerCase()) return openMe();
+  const list = posts().filter(p => p.h === h).sort((a, b) => votesOf(b) - votesOf(a));
+  if (!list.length) return;
+  const insts = [...new Set(list.map(p => p.inst))], city = list.find(p => p.city && p.city !== "—")?.city;
+  const total = list.reduce((s, p) => s + votesOf(p), 0);
+  const body = `<div class="head"><span class="av">${initial(h)}</span><div><h2>${esc(h)}</h2><div class="muted">${insts.map(esc).join(", ")}${city ? " · " + esc(city) : ""}</div></div></div>
+    <div class="specs"><span>${total} votos</span><span>${list.length} vídeo${list.length > 1 ? "s" : ""}</span></div>
+    ${videoList(list)}
+    <div class="row"><a class="btn ghost" href="${esc(list[0].url)}" target="_blank" rel="noopener">perfil no ${netName(list[0])} ↗</a><button class="btn${follows.has(h) ? "" : " go"}" data-follow="${esc(h)}">${follows.has(h) ? "seguindo" : "seguir"}</button></div>`;
+  openWin("w-artist", h, body, 320, { x: desk.clientWidth * .3 });
 }
 function embedCode(p) {
   return p.net === "instagram"
@@ -344,91 +622,70 @@ function embedCode(p) {
 function openVideo(p, from) {
   const W = Math.min(340, desk.clientWidth - 24), inner = W - 28;
   const body = `<div class="big"></div>
-    <div class="row" style="justify-content:space-between;align-items:center"><button class="vote" data-vote="${p.id}" aria-pressed="${voted.has(p.id)}">▲ ${votesOf(p)}</button>
-    <a class="btn" href="${esc(p.url)}" target="_blank" rel="noopener">abrir no ${netName(p)} ↗</a></div>
+    <div class="row" style="justify-content:space-between"><button class="vote" data-vote="${p.id}" aria-pressed="${voted.has(p.id)}">▲ ${votesOf(p)}</button>
+    <span class="row"><button class="btn ghost" data-artist="${esc(p.h)}">ver perfil</button><a class="btn" href="${esc(p.url)}" target="_blank" rel="noopener">abrir ↗</a></span></div>
     ${SANDBOX ? `<div class="muted" style="font-size:12px">A prévia do Claude bloqueia players de fora. No site publicado o vídeo toca aqui.</div>` : ""}
     <details><summary>código do embed</summary><pre>${esc(embedCode(p))}</pre></details>`;
-  const { el, fresh } = win("w-video", p.h, body, W);
+  const { el, fresh } = win("w-video", `${p.h} · ${p.inst}`, body, W);
   const big = el.querySelector(".big");
-  if (SANDBOX) { big.innerHTML = placeholder(p); }
+  if (SANDBOX) big.innerHTML = placeholder(p);
   else {
-    const P = PLAYER[p.net], k = Math.min(1, inner / P.w), maxH = desk.clientHeight - 150;
-    const h = Math.min(P.h * k, maxH);
+    const P = PLAYER[p.net], k = Math.min(1, inner / P.w), h = Math.min(P.h * k, desk.clientHeight - 150);
     big.style.height = h + "px";
     big.innerHTML = `<iframe src="${P.src(p)}" width="${P.w}" height="${P.h}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen style="transform:scale(${k});transform-origin:0 0;width:${P.w}px;height:${P.h}px" title="${netName(p)} de ${esc(p.h)}"></iframe>`;
   }
-  if (fresh) {
-    const x = Math.min(Math.max(8, (from?.x ?? desk.clientWidth / 2) + 30), desk.clientWidth - W - 8);
-    place(el, x, 10, rand(-1, 1), { drop: true });
-  }
+  if (fresh) place(el, clamp((from?.x ?? desk.clientWidth / 2) + 30, 8, desk.clientWidth - W - 8), 8, rand(-1, 1), { drop: true });
 }
-
-const DOODLES = {
-  arrow: `<svg width="120" height="70" viewBox="0 0 120 70"><path d="M4 60c22-6 48-18 70-38 8-7 14-12 22-15"/><path d="M84 4l14 2-6 13"/></svg>`,
-  star: `<svg width="46" height="46" viewBox="0 0 46 46"><path d="M23 3l5 14 15 1-12 9 5 15-13-9-12 9 4-15L3 18l15-1z"/></svg>`,
-  squiggle: `<svg width="110" height="24" viewBox="0 0 110 24"><path d="M3 14c8-10 14 8 22-1s14 8 22-1 14 8 22-1 14 8 22-1 9 5 14 2"/></svg>`,
-};
-function doodle(svg) { const el = document.createElement("div"); el.className = "item doodle"; el.innerHTML = svg; el.tabIndex = -1; return el; }
 
 // Entry: everything fades up from 0.95 with a short stagger, never from nothing.
 function enter(el, it, i) {
   el.style.opacity = 0; it.ms.set(.95);
-  setTimeout(() => { el.style.transition = (el.style.transition ? el.style.transition + "," : "") + "opacity 240ms cubic-bezier(0.23,1,0.32,1)"; el.style.opacity = 1; it.ms.to(1, { response: .35 }); }, 40 + i * 45);
+  setTimeout(() => { el.style.transition = "opacity 240ms cubic-bezier(0.23,1,0.32,1)"; el.style.opacity = 1; it.ms.to(1, { response: .35 }); }, 40 + i * 45);
 }
 
 function build() {
-  const W = desk.clientWidth, H = desk.clientHeight, narrow = W < 560;
-  desk.style.setProperty("--pw", (narrow ? 130 : Math.min(190, Math.max(150, W / 8))) + "px");
-  let i = 0;
-  const add = (el, x, y, r) => { const it = place(el, x, y, r); enter(el, it, i++); return it; };
-  add(note(`<b>exemplo real</b>Vídeos públicos do Instagram e do TikTok, puxados só pelo link. Arrasta pela borda, aperta play no vídeo e vota no ▲.`, "paper"), 14, narrow ? H - 150 : 16, rand(-3, 3));
-  posts().forEach(p => { const el = polaroid(p); desk.appendChild(el); const { x, y } = scatterPos(el); add(el, x, y, rand(-8, 8)); });
-  add(note("make art<br>not content"), narrow ? W - 160 : W * .42, H - (narrow ? 120 : 160), rand(-6, 6));
-  [
-    `<span class="stk round" style="background:var(--green-fill)">banda<br>aberta</span>`,
-    `<span class="stk pill" style="background:var(--yellow)">less ego, more noise</span>`,
-    `<span class="stk drop" style="background:var(--blue);color:#fff"><span>BR</span></span>`,
-    `<span class="stk round" style="background:var(--coral)">vem<br>tocar</span>`,
-  ].forEach(h => { const el = sticker(h); desk.appendChild(el); const { x, y } = scatterPos(el); add(el, x, y, rand(-18, 18)); });
-  if (!narrow) {
-    add(doodle(DOODLES.arrow), W - 440, 120, -6);
-    add(doodle(DOODLES.star), W * .3, H - 90, 0);
-    add(doodle(DOODLES.squiggle), 40, H - 60, -3);
-  }
-  openCover(narrow ? { x: 10, y: H * .3 } : null);
-  updateCount();
+  measure(); rankUp();
+  const { W, H, narrow } = L;
+  fill();
+  let i = L.n;
+  const add = (el, x, y, r) => { desk.appendChild(el); const it = place(el, x, y, r); enter(el, it, i++); return it; };
+  const cv = note(`<span class="sm">cover da semana ${COVER.week}</span><b>${COVER.song}</b><span class="sm">${COVER.bpm} bpm · ${COVER.key} · vota até domingo</span>`);
+  cv.dataset.click = "cover"; cv.setAttribute("aria-label", "Cover da semana. Enter abre");
+  add(cv, narrow ? 6 : W * .64, H - (narrow ? 118 : 150), rand(-5, 3));
+  add(sticker(`<span class="stk round" style="background:var(--moss);color:var(--paper)">banda<br>aberta</span>`), narrow ? W - 84 : W * .05, H - (narrow ? 250 : 190), rand(-14, 14));
+  if (!narrow) add(sticker(`<span class="stk pill" style="background:var(--paper);box-shadow:inset 0 0 0 1.5px var(--ink),3px 4px 0 rgba(70,45,20,.22)">here to make noise</span>`), W * .29, H - 48, rand(-8, 8));
+  tick();
 }
 function tidy() {
-  const els = [...items.keys()].filter(el => el.classList.contains("pola"));
-  const W = desk.clientWidth, w = els[0]?.offsetWidth || 180, gap = 16;
-  const cols = Math.max(1, Math.floor((W - 16) / (w + gap)));
-  const left = (W - (cols * (w + gap) - gap)) / 2;
+  const els = cardsOnDesk(), { W, cw } = L, gap = 14;
+  const cols = Math.max(1, Math.floor((W - 16) / (cw + gap))), left = (W - (cols * (cw + gap) - gap)) / 2;
   els.forEach((el, i) => {
     const it = items.get(el);
-    it.mx.to(left + (i % cols) * (w + gap), { response: .45 });
-    it.my.to(16 + Math.floor(i / cols) * (el.offsetHeight + gap), { response: .45 });
+    it.mx.to(left + (i % cols) * (cw + gap), { response: .45 });
+    it.my.to(12 + Math.floor(i / cols) * (el.offsetHeight + gap), { response: .45 });
     it.mr.to(0, { response: .4 }); el.style.zIndex = 10 + i;
   });
 }
 function mess() {
-  [...items.keys()].forEach((el, i) => {
+  [...items.keys()].filter(el => !el.classList.contains("win")).forEach((el, i) => {
     const it = items.get(el), { x, y } = scatterPos(el);
     setTimeout(() => { it.mx.to(x, { damping: .75, response: .55 }); it.my.to(y, { damping: .75, response: .55 }); it.mr.to(rand(-10, 10), { damping: .8, response: .5 }); }, i * 18);
   });
 }
 
-// Drag: the item keeps its tilt while held (no spinning), springs carry the throw on release.
+/* ---------- drag: the item keeps its tilt while held (no spinning), springs carry the throw on release ---------- */
 let drag = null;
 desk.addEventListener("pointerdown", e => {
+  if (e.pointerType !== "mouse") feed.holdUntil = Date.now() + 8000;
   const el = e.target.closest(".item");
   if (!el || e.button > 0) return;
-  if (e.target.closest("button,a,input,select,label,textarea,summary,pre")) { front(el); return; }
+  if (e.target.closest("button,a,input,select,label,textarea,summary,pre,.wb")) { front(el); return; }
   const it = items.get(el); if (!it) return;
   e.preventDefault();
   el.setPointerCapture(e.pointerId);
   front(el); el.classList.add("lifted"); document.body.classList.add("dragging");
   it.ms.to(1.03, { response: .25 });
-  drag = { el, it, id: e.pointerId, ox: e.clientX - it.mx.get(), oy: e.clientY - it.my.get(), sx: e.clientX, sy: e.clientY, moved: false, tx: Motion.tracker(), ty: Motion.tracker() };
+  drag = { el, it, id: e.pointerId, target: e.target, ox: e.clientX - it.mx.get(), oy: e.clientY - it.my.get(), sx: e.clientX, sy: e.clientY, moved: false, tx: Motion.tracker(), ty: Motion.tracker() };
 });
 desk.addEventListener("pointermove", e => {
   if (!drag || e.pointerId !== drag.id) return;
@@ -442,12 +699,13 @@ function release(e) {
   el.classList.remove("lifted"); document.body.classList.remove("dragging");
   it.ms.to(1, { response: .3 });
   if (!d.moved) {
-    const p = el.dataset.post && posts().find(q => q.id === el.dataset.post);
+    if (el.dataset.click === "cover") return openCover();
+    const p = el.dataset.post && byId(el.dataset.post);
+    if (p && d.target.closest(".who")) return openArtist(p.h);
     if (p) openVideo(p, { x: it.x + el.offsetWidth * .6, y: it.y });
     return;
   }
   const b = bounds(el), vx = d.tx.velocity(), vy = d.ty.velocity();
-  const clamp = (v, a, z) => Math.min(z, Math.max(a, v));
   it.mx.to(clamp(it.x + Motion.project(vx, .99), b.minX, b.maxX), { velocity: vx, damping: .8, response: .4 });
   it.my.to(clamp(it.y + Motion.project(vy, .99), b.minY, b.maxY), { velocity: vy, damping: .8, response: .4 });
 }
@@ -459,26 +717,83 @@ desk.addEventListener("keydown", e => {
   const it = items.get(el), step = e.shiftKey ? 40 : 12;
   const mv = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
   if (mv) { e.preventDefault(); front(el); it.mx.to(it.mx.get() + mv[0]); it.my.to(it.my.get() + mv[1]); }
-  if (e.key === "Enter" && el.dataset.post) { const p = posts().find(q => q.id === el.dataset.post); if (p) openVideo(p, { x: it.x, y: it.y }); }
+  if (e.key === "Enter") {
+    if (el.dataset.click === "cover") openCover();
+    const p = el.dataset.post && byId(el.dataset.post); if (p) openVideo(p, { x: it.x, y: it.y });
+  }
 });
+
+/* ---------- clicks ---------- */
+function refreshWindows() {
+  if (document.getElementById("w-cover")) openCover();
+  if (document.getElementById("w-rank")) openRank();
+}
+const pop = document.getElementById("pop"), cInst = document.getElementById("c-inst");
+function openPop() {
+  const counts = Object.fromEntries(INSTR.map(i => [i, posts().filter(p => p.inst === i).length]));
+  pop.innerHTML = INSTR.map(i => `<button role="menuitem" data-inst="${i}"${counts[i] ? "" : " disabled"}>${i}<span>${counts[i]}</span></button>`).join("");
+  const r = cInst.getBoundingClientRect();
+  pop.style.left = clamp(r.left, 8, innerWidth - 190) + "px"; pop.style.top = r.bottom + 6 + "px";
+  pop.classList.remove("closed"); cInst.setAttribute("aria-expanded", "true");
+  pop.querySelector("button:not(:disabled)")?.focus({ preventScroll: true });
+}
+function closePop() { pop.classList.add("closed"); cInst.setAttribute("aria-expanded", "false"); }
 
 document.addEventListener("click", e => {
-  const v = e.target.closest("[data-vote]");
+  const t = e.target;
+  if (!t.closest("#pop,#c-inst")) closePop();
+  const v = t.closest("[data-vote]");
   if (v) {
     const id = v.dataset.vote; voted.has(id) ? voted.delete(id) : voted.add(id); store.set("kvsh.voted2", [...voted]);
-    const p = posts().find(q => q.id === id);
+    const p = byId(id); rankUp();
     document.querySelectorAll(`[data-vote="${id}"]`).forEach(b => { b.textContent = "▲ " + votesOf(p); b.setAttribute("aria-pressed", voted.has(id)); });
-    if (document.getElementById("w-cover") && p.cover) openCover();
+    if (document.getElementById("w-rank") || (p.cover && document.getElementById("w-cover"))) refreshWindows();
     return;
   }
-  const x = e.target.closest(".tb .x"); if (x) { closeItem(x.closest(".item")); return; }
-  const o = e.target.closest("[data-open]"); if (o) { openPost(o.dataset.open === "post-cover"); return; }
+  const pin = t.closest("[data-pin]");
+  if (pin) {
+    const id = pin.dataset.pin, on = !pins.has(id);
+    on ? pins.add(id) : pins.delete(id); store.set("kvsh.pins", [...pins]);
+    pin.setAttribute("aria-pressed", on);
+    toast(on ? "preso na mesa. esse não sai." : "solto. entra na roda de novo.");
+    return;
+  }
+  const md = t.closest("[data-mode]"); if (md) { setMode(md.dataset.mode); return; }
+  if (t.closest("#c-inst")) { pop.classList.contains("closed") ? openPop() : closePop(); return; }
+  const ins = t.closest("[data-inst]"); if (ins) { closePop(); setMode("inst", ins.dataset.inst); return; }
+  const rk = t.closest("[data-rk]"); if (rk) { openRank(rk.dataset.rk); return; }
+  const pl = t.closest("[data-play]"); if (pl) { const p = byId(pl.dataset.play), it = items.get(pl.closest(".item")); openVideo(p, it ? { x: it.x + 100 } : null); return; }
+  const ar = t.closest("[data-artist]"); if (ar) { openArtist(ar.dataset.artist); return; }
+  const fo = t.closest("[data-follow]");
+  if (fo) {
+    const h = fo.dataset.follow; follows.has(h) ? follows.delete(h) : follows.add(h); store.set("kvsh.follows", [...follows]);
+    fo.textContent = follows.has(h) ? "seguindo" : "seguir"; fo.classList.toggle("go", !follows.has(h));
+    return;
+  }
+  const x = t.closest(".tb .x"); if (x) { closeItem(x.closest(".item")); return; }
+  const o = t.closest("[data-open]");
+  if (o) {
+    const k = o.dataset.open;
+    if (k === "post" || k === "post-cover") openPost(k === "post-cover");
+    if (k === "profile-edit") openProfile();
+    if (k === "logout") { me = null; store.set("kvsh.me", null); refreshMe(); closeItem(document.getElementById("w-me")); toast("saiu. o perfil ficou só neste aparelho."); }
+  }
+});
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (!pop.classList.contains("closed")) { closePop(); cInst.focus(); return; }
+  const top = [...items.keys()].filter(el => el.classList.contains("win") && !el.dataset.gone).sort((a, b) => b.style.zIndex - a.style.zIndex)[0];
+  if (top) closeItem(top);
 });
 document.getElementById("m-post").onclick = () => openPost(false);
+document.getElementById("m-rank").onclick = () => openRank();
 document.getElementById("m-cover").onclick = () => openCover();
+document.getElementById("m-me").onclick = () => openMe();
 document.getElementById("m-tidy").onclick = tidy;
 document.getElementById("m-mess").onclick = mess;
+timerEl.onclick = () => { feed.paused = !feed.paused; drawTimer(pausedWhy()); };
 
+/* ---------- forms ---------- */
 function parseLink(raw) {
   let u; try { u = new URL(raw.trim()); } catch (e) { return { error: "isso não parece um link. copia pelo botão compartilhar do app." }; }
   const h = u.hostname.replace(/^www\.|^m\./, "");
@@ -488,7 +803,7 @@ function parseLink(raw) {
   }
   if (h === "tiktok.com") {
     const m = u.pathname.match(/^\/@([^/]+)\/video\/(\d+)/);
-    return m ? { net: "tiktok", vid: m[2], h: "@" + m[1], url: `https://www.tiktok.com/@${m[1]}/video/${m[2]}` } : { error: "esse é o link do perfil. precisa ser o link do vídeo." };
+    return m ? { net: "tiktok", vid: m[2], url: `https://www.tiktok.com/@${m[1]}/video/${m[2]}` } : { error: "esse é o link do perfil. precisa ser o link do vídeo." };
   }
   if (h === "vm.tiktok.com" || h === "vt.tiktok.com") return { error: "link curto do tiktok: abre ele no navegador e copia o link completo (com /video/)." };
   return { error: "por enquanto só instagram e tiktok." };
@@ -500,35 +815,273 @@ document.addEventListener("input", e => {
   const r = parseLink(val);
   det.className = "det " + (r.error ? "err" : "ok");
   det.textContent = r.error || `${netName(r)} reconhecido`;
-  const hIn = document.getElementById("f-h"); if (r.h && !hIn.value) hIn.value = r.h;
 });
 document.addEventListener("submit", e => {
-  if (e.target.id !== "pf") return;
   e.preventDefault();
-  const det = document.getElementById("det"), r = parseLink(document.getElementById("f-url").value);
-  if (r.error) { det.className = "det err"; det.textContent = r.error; document.getElementById("f-url").focus(); return; }
-  let h = document.getElementById("f-h").value.trim();
-  if (!h) { det.className = "det err"; det.textContent = "falta o seu @."; document.getElementById("f-h").focus(); return; }
-  if (!h.startsWith("@")) h = "@" + h;
-  const p = { id: "u" + Date.now(), net: r.net, vid: r.vid, url: r.url, h, city: document.getElementById("f-city").value.trim() || "—", inst: document.getElementById("f-inst").value, cover: document.getElementById("f-cover").checked, votes: 0, stk: ["novo"] };
-  mine.unshift(p); store.set("kvsh.posts2", mine);
-  const w = document.getElementById("w-post"), wi = items.get(w);
-  place(polaroid(p), wi ? wi.x + 40 : desk.clientWidth / 2 - 90, wi ? wi.y + 20 : 40, rand(-7, 7), { drop: true });
-  closeItem(w);
-  if (p.cover && document.getElementById("w-cover")) openCover();
-  updateCount(); toast(p.cover ? "tá na mesa e no cover" : "tá na mesa");
+  if (e.target.id === "prof") {
+    const det = document.getElementById("pdet"), err = (m, id) => { det.className = "det err"; det.textContent = m; document.getElementById(id)?.focus(); };
+    const name = document.getElementById("p-name").value.trim();
+    let h = document.getElementById("p-h").value.trim().replace(/\s+/g, "");
+    const inst = [...e.target.querySelectorAll("fieldset input:checked")].map(i => i.value);
+    if (!name) return err("falta o nome.", "p-name");
+    if (!h || h === "@") return err("falta o seu @.", "p-h");
+    if (!inst.length) return err("marca pelo menos um instrumento.", null);
+    if (!h.startsWith("@")) h = "@" + h;
+    const fresh = !me;
+    me = { name, h, city: document.getElementById("p-city").value.trim(), inst, bio: document.getElementById("p-bio").value.trim() };
+    store.set("kvsh.me", me); refreshMe();
+    toast(fresh ? "perfil criado. bem-vindo à mesa." : "perfil salvo.");
+    if (afterProfile) { const f = afterProfile; afterProfile = null; closeItem(document.getElementById("w-me")); setTimeout(f, 180); }
+    else openMe();
+    return;
+  }
+  if (e.target.id === "pf") {
+    const det = document.getElementById("det"), r = parseLink(document.getElementById("f-url").value);
+    if (r.error) { det.className = "det err"; det.textContent = r.error; document.getElementById("f-url").focus(); return; }
+    const p = { id: "u" + Date.now(), net: r.net, vid: r.vid, url: r.url, h: me.h, city: me.city || "—", inst: document.getElementById("f-inst").value, cover: document.getElementById("f-cover").checked, votes: 0, hot: 0, at: Date.now() };
+    mine.unshift(p); store.set("kvsh.posts3", mine);
+    pins.add(p.id); store.set("kvsh.pins", [...pins]); rankUp();
+    const w = document.getElementById("w-post"), wi = items.get(w);
+    const el = polaroid(p); el.dataset.slot = -1;
+    place(el, wi ? wi.x + 30 : L.W / 2 - 90, wi ? wi.y + 20 : 40, rand(-6, 6), { drop: true });
+    closeItem(w); refreshWindows(); updateCount();
+    toast(p.cover ? "tá na mesa e no cover" : "tá na mesa, preso com o mosquetão");
+  }
 });
+function refreshMe() {
+  document.getElementById("m-me").classList.toggle("in", !!me);
+  document.getElementById("me-av").textContent = me ? initial(me.name) : "+";
+  document.getElementById("me-t").textContent = me ? me.h : "criar perfil";
+}
 
 function tick() {
   const now = new Date(), end = new Date(now); end.setDate(now.getDate() + ((7 - now.getDay()) % 7)); end.setHours(23, 59, 59, 0);
   const t = Math.max(0, end - now), d = Math.floor(t / 864e5), h = Math.floor(t / 36e5) % 24, m = Math.floor(t / 6e4) % 60;
   document.querySelectorAll("[data-clock]").forEach(el => el.textContent = `votação fecha domingo 23:59 · faltam ${d}d ${h}h ${m}min`);
-  document.getElementById("time").textContent = now.toLocaleDateString("pt-BR", { weekday: "short" }) + " " + now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
-function updateCount() { document.getElementById("count").textContent = posts().length + " vídeos na mesa"; }
+function updateCount() { document.getElementById("count").textContent = `${posts().length} vídeos na banda`; }
 function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2400); }
 setInterval(tick, 20000);
-build(); tick();
+let rsz; addEventListener("resize", () => { clearTimeout(rsz); rsz = setTimeout(() => { const n = L.n; measure(); if (L.n > n) fill(); }, 150); });
+refreshMe(); build();
+</script>
+
+<script type="module">
+// The table: light wood, lit from the upper left, with the brand's objects lying on it.
+// Rendered only when something changes (resize, pointer parallax), never in a loop.
+const canvas = document.getElementById("table"), desk = document.getElementById("desk");
+const SRC = { three: "./lib/three.module.min.js", pin: "img/kvsh-studio-face.jpg" };
+let THREE = null;
+try { THREE = await import(SRC.three); } catch (e) { console.warn("three.js não carregou, fica o fundo de madeira em CSS", e); }
+// Let the cards land first; building the table takes a moment on slow phones.
+await new Promise(r => setTimeout(r, 450));
+if (THREE) { try { await setup(); } catch (e) { console.warn(e); canvas.remove(); } } else canvas.remove();
+
+async function setup() {
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "low-power" });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = false;
+  renderer.toneMapping = THREE.NeutralToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(30, 1, 1, 200);
+  const BASE = new THREE.Vector3(0, 34, 5);
+  camera.position.copy(BASE); camera.lookAt(0, 0, 0);
+
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(room(), 0.04).texture;
+  scene.environmentIntensity = .55;
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xcbb38c, .55));
+  const sun = new THREE.DirectionalLight(0xfff1de, 2.3);
+  sun.position.set(-11, 24, -13); sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -.0005; sun.shadow.normalBias = .02;
+  scene.add(sun, sun.target);
+
+  const anis = renderer.capabilities.getMaxAnisotropy();
+  const wood = new THREE.CanvasTexture(woodTile(1536));
+  wood.colorSpace = THREE.SRGBColorSpace; wood.wrapS = wood.wrapT = THREE.RepeatWrapping; wood.anisotropy = anis;
+  const table = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshStandardMaterial({ map: wood, roughness: .78 }));
+  table.rotation.x = -Math.PI / 2; table.receiveShadow = true; scene.add(table);
+
+  const M = {
+    green: new THREE.MeshStandardMaterial({ color: 0x2E5438, metalness: .75, roughness: .3 }),
+    steel: new THREE.MeshStandardMaterial({ color: 0xd8d4cc, metalness: 1, roughness: .22 }),
+    black: new THREE.MeshStandardMaterial({ color: 0x141412, roughness: .5 }),
+    white: new THREE.MeshStandardMaterial({ color: 0xEDE6DA, roughness: .55 }),
+    felt: new THREE.MeshStandardMaterial({ color: 0x0A0A08, roughness: .95 }),
+  };
+  const shadowy = o => { o.traverse(m => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } }); return o; };
+
+  const objs = {
+    biner: shadowy(carabiner(M)),
+    black: shadowy(marker(M.black, M.black, M.white, true)),
+    white: shadowy(marker(M.white, M.black, M.black, false)),
+    cap: shadowy(cap(M.black)),
+    pin: shadowy(pinButton()),
+  };
+  Object.values(objs).forEach(o => scene.add(o));
+
+  await document.fonts.load('60px "KidType Crayon"').catch(() => {});
+  const words = decal(1400, 420, g => {
+    g.font = '120px "KidType Crayon","Gochi Hand",cursive'; g.textBaseline = "alphabetic";
+    ink(g, () => { g.fillText("cola teu vídeo.", 30, 150); g.fillText("vota. repete.", 120, 300); });
+    g.lineWidth = 7; g.lineCap = "round";
+    ink(g, () => { g.beginPath(); g.moveTo(110, 350); g.bezierCurveTo(400, 330, 700, 372, 1000, 338); g.stroke(); });
+  });
+  const ring = decal(512, 512, g => {
+    g.lineCap = "round";
+    for (let k = 0; k < 3; k++) { g.strokeStyle = `rgba(105,62,25,${.16 - k * .04})`; g.lineWidth = 16 - k * 5; g.beginPath(); g.ellipse(256 + k * 4, 256 - k * 3, 196 - k * 8, 190 - k * 6, .3, .2 + k, Math.PI * 2 - .6 + k * .3); g.stroke(); }
+  });
+  const scribble = decal(600, 300, g => {
+    g.lineWidth = 6; g.lineCap = "round"; g.lineJoin = "round";
+    ink(g, () => { g.beginPath(); g.moveTo(30, 230); g.bezierCurveTo(160, 210, 300, 140, 470, 70); g.stroke(); g.beginPath(); g.moveTo(420, 52); g.lineTo(480, 66); g.lineTo(452, 122); g.stroke(); });
+  });
+  scene.add(words, ring, scribble);
+
+  const ray = new THREE.Raycaster(), floor = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), v = new THREE.Vector3();
+  let wpp = .02;
+  // screen point (px) -> spot on the table
+  const onTable = (sx, sy) => { ray.setFromCamera({ x: sx / innerWidth * 2 - 1, y: -(sy / innerHeight) * 2 + 1 }, camera); return ray.ray.intersectPlane(floor, v.clone()); };
+  function put(o, fx, fy, px, size, turn) {
+    const r = desk.getBoundingClientRect(), p = onTable(r.left + r.width * fx, r.top + r.height * fy);
+    const s = px * wpp / size;
+    o.scale.setScalar(s); o.position.set(p.x, 0, p.z); o.rotation.y = turn;
+  }
+  function layout() {
+    const w = innerWidth, h = innerHeight, narrow = w < 560;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.position.copy(BASE); camera.lookAt(0, 0, 0); camera.updateProjectionMatrix();
+    const visH = 2 * BASE.length() * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), visW = visH * w / h;
+    wpp = visH / h;
+    const S = Math.max(visW, visH) * 1.8;
+    table.scale.set(S, S, 1);
+    const tile = 1100 * wpp; wood.repeat.set(S / tile, S / tile);
+    sun.shadow.camera.left = -visW * .7; sun.shadow.camera.right = visW * .7; sun.shadow.camera.top = visH * .8; sun.shadow.camera.bottom = -visH * .8;
+    sun.shadow.camera.near = 1; sun.shadow.camera.far = 80; sun.shadow.camera.updateProjectionMatrix();
+    const k = narrow ? .62 : 1;
+    put(objs.biner, .87, .8, 250 * k, 3.4, .5);
+    put(objs.black, .1, .86, 300 * k, 4.6, -.35);
+    put(objs.white, .33, .97, 270 * k, 4.2, .22);
+    put(objs.cap, .44, .82, 80 * k, 1.2, 1.15);
+    put(objs.pin, narrow ? .7 : .56, narrow ? .91 : .86, 128 * k, 2, Math.PI / 2);
+    put(words, narrow ? .4 : .27, narrow ? .74 : .79, (narrow ? .7 : .3) * innerWidth, 1, 0);
+    put(ring, .74, .58, 150 * k, 1, 0);
+    put(scribble, .2, .66, 140 * k, 1, 0);
+    [words, ring, scribble].forEach(d => { d.scale.set(d.scale.x, d.scale.x * d.userData.aspect, 1); d.position.y = .004; d.rotation.set(-Math.PI / 2, 0, 0); });
+    renderer.shadowMap.needsUpdate = true;
+    render();
+  }
+  let queued = false;
+  function render() { if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; renderer.render(scene, camera); }); }
+  addEventListener("resize", layout);
+  layout();
+
+  // Parallax: the table sits a little below the paper, so it slides slightly against the cards.
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches && matchMedia("(pointer:fine)").matches) {
+    const look = new THREE.Vector3();
+    const set = () => { camera.position.set(BASE.x + px.get(), BASE.y, BASE.z + py.get()); look.set(px.get() * .35, 0, py.get() * .35); camera.lookAt(look); render(); };
+    const px = Motion.value(0, set), py = Motion.value(0, set);
+    addEventListener("pointermove", e => { px.to((e.clientX / innerWidth - .5) * 1.4, { response: .9 }); py.to((e.clientY / innerHeight - .5) * 1.1, { response: .9 }); });
+  }
+
+  /* --- builders --- */
+  function room() {
+    const s = new THREE.Scene();
+    s.add(new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10), new THREE.MeshBasicMaterial({ color: 0x8c8378, side: THREE.BackSide })));
+    const lamp = (w, h, x, y, z, i) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(i, i, i) })); m.position.set(x, y, z); m.lookAt(0, 0, 0); s.add(m); };
+    lamp(6, 3, -2, 4.9, -2, 5); lamp(2, 5, 4.9, 1, 0, 1.6); lamp(5, 2, 0, 1, 4.9, 1.2); lamp(3, 3, -4.9, 2, 2, 2);
+    return s;
+  }
+  // Pear-shaped carabiner: anodized green body, steel gate with a screw sleeve.
+  function carabiner(M) {
+    const g = new THREE.Group(), flat = new THREE.Group();
+    const gap0 = -.38, gap1 = .58, N = 90, pts = [];
+    for (let i = 0; i <= N; i++) {
+      const t = gap1 + (Math.PI * 2 - (gap1 - gap0)) * i / N;
+      pts.push(new THREE.Vector3(Math.cos(t) * (1 + .24 * Math.sin(t)), Math.sin(t) * 1.55, 0));
+    }
+    const R = .14;
+    flat.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 200, R, 20, false), M.green));
+    const A = pts[0], B = pts[N];
+    [A, B].forEach(p => { const s = new THREE.Mesh(new THREE.SphereGeometry(R, 20, 14), M.green); s.position.copy(p); flat.add(s); });
+    const rod = (a, b, r, mat) => {
+      const d = b.clone().sub(a), m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, d.length(), 20), mat);
+      m.position.copy(a).add(b).multiplyScalar(.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); return m;
+    };
+    flat.add(rod(B, A, .09, M.steel));
+    flat.add(rod(B.clone().lerp(A, .08), B.clone().lerp(A, .5), .15, M.steel));
+    flat.rotation.x = -Math.PI / 2; flat.position.y = R + .01;
+    g.add(flat);
+    return g;
+  }
+  // A fat marker lying on its side, along x. Capped or with the chisel tip showing.
+  function marker(body, capMat, band, capped) {
+    const g = new THREE.Group(), r = .36, len = 3.2;
+    const cyl = (r1, r2, l, mat, x) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r1, r2, l, 32), mat); m.rotation.z = Math.PI / 2; m.position.x = x; g.add(m); return m; };
+    cyl(r, r, len, body, 0);
+    cyl(r + .006, r + .006, .9, band, -.5);
+    cyl(r * .92, r * .92, .16, capMat, -len / 2 - .08);
+    cyl(.2, r, .3, body, len / 2 + .15);
+    const tip = new THREE.Mesh(new THREE.BoxGeometry(.34, .16, .26), M.felt); tip.position.x = len / 2 + .45; tip.rotation.x = .4; g.add(tip);
+    if (capped) { const c = cap(capMat); c.position.set(len / 2 + .05, 0, 0); c.rotation.y = 0; c.children[0].position.y = 0; g.add(c); }
+    g.children.forEach(m => m.position.y += capped ? r + .06 : r);
+    return g;
+  }
+  function cap(mat) {
+    const g = new THREE.Group(), c = new THREE.Group(), r = .42, l = 1.15;
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(r, r, l, 32), mat); body.rotation.z = Math.PI / 2; c.add(body);
+    const end = new THREE.Mesh(new THREE.SphereGeometry(r, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat); end.rotation.z = -Math.PI / 2; end.position.x = l / 2; end.scale.set(1, .35, 1); c.add(end);
+    const clip = new THREE.Mesh(new THREE.BoxGeometry(.95, .07, .16), mat); clip.position.set(-.05, r + .07, 0); c.add(clip);
+    c.position.y = r; g.add(c);
+    return g;
+  }
+  // The studio pin (the photo Saulo sent), face up and upright.
+  function pinButton() {
+    const g = new THREE.Group();
+    const tex = new THREE.TextureLoader().load(SRC.pin, () => { renderer.shadowMap.needsUpdate = true; render(); });
+    tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = anis;
+    const face = new THREE.MeshStandardMaterial({ map: tex, roughness: .42 });
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, .2, 72), [M.steel, face, M.steel]);
+    m.position.y = .1; g.add(m);
+    return g;
+  }
+  function decal(w, h, draw) {
+    const c = document.createElement("canvas"); c.width = w; c.height = h;
+    draw(c.getContext("2d"));
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = anis;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshStandardMaterial({ map: t, transparent: true, roughness: .8, depthWrite: false }));
+    m.receiveShadow = true; m.userData.aspect = h / w;
+    return m;
+  }
+  // Marker on wood: a soft bleed under a solid stroke.
+  function ink(g, path) {
+    g.save(); g.fillStyle = g.strokeStyle = "rgba(14,12,10,.22)"; g.shadowColor = "rgba(14,12,10,.35)"; g.shadowBlur = 6; path(); g.restore();
+    g.save(); g.fillStyle = g.strokeStyle = "rgba(14,12,10,.86)"; path(); g.restore();
+  }
+  // Light oak, tileable: grain lines are sums of whole-period sines, noise is per pixel.
+  function woodTile(S) {
+    const c = document.createElement("canvas"); c.width = c.height = S;
+    const g = c.getContext("2d"), TAU = Math.PI * 2;
+    g.fillStyle = "#e0c9a2"; g.fillRect(0, 0, S, S);
+    for (let i = 0; i < 16; i++) {
+      const y = Math.random() * S, hh = 30 + Math.random() * 160;
+      g.fillStyle = Math.random() < .5 ? `rgba(160,115,60,${.04 + Math.random() * .06})` : `rgba(255,240,215,${.05 + Math.random() * .07})`;
+      for (const o of [-S, 0, S]) g.fillRect(0, y + o, S, hh);
+    }
+    for (let i = 0; i < 300; i++) {
+      const y0 = Math.random() * S, a = 2 + Math.random() * 12, k1 = 1 + (Math.random() * 3 | 0), k2 = 3 + (Math.random() * 5 | 0), p1 = Math.random() * TAU, p2 = Math.random() * TAU;
+      g.strokeStyle = `rgba(120,78,36,${.05 + Math.random() * .13})`; g.lineWidth = .6 + Math.random() * 2;
+      for (const o of [-S, 0, S]) {
+        g.beginPath();
+        for (let x = 0; x <= S; x += 8) { const y = y0 + o + Math.sin(x / S * TAU * k1 + p1) * a + Math.sin(x / S * TAU * k2 + p2) * a * .3; x ? g.lineTo(x, y) : g.moveTo(x, y); }
+        g.stroke();
+      }
+    }
+    const img = g.getImageData(0, 0, S, S), d = img.data;
+    for (let i = 0; i < d.length; i += 4) { const n = (Math.random() - .5) * 12; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+    g.putImageData(img, 0, 0);
+    return c;
+  }
+}
 </script>
 </body>
 </html>
